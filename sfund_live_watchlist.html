@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- saved from url=(0060)https://dc-trading.github.io/SFund/sfund_live_watchlist.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TSP S Fund Live Watchlist</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -278,34 +278,375 @@
     <div>
       <div class="terminal-label">TSP INTELLIGENCE TERMINAL · LIVE</div>
       <div class="terminal-title">S FUND WATCHLIST</div>
-      <div class="terminal-subtitle" id="datestamp"></div>
+      <div class="terminal-subtitle" id="datestamp">Dow Jones U.S. Completion TSM Index · Sunday, March 1, 2026</div>
     </div>
     <div id="overall-signal">
       <div class="sig-label">OVERALL SIGNAL</div>
-      <div class="sig-value" id="overall-val">CALCULATING...</div>
-      <div class="sig-note" id="overall-note">Loading live data...</div>
+      <div class="sig-value" id="overall-val" style="color: rgb(255, 68, 102);">⚠ NEAR-TERM CAUTION</div>
+      <div class="sig-note" id="overall-note">4 of 5 signals negative</div>
     </div>
   </div>
 
   <div id="status-bar">
-    <div id="live-dot" class="loading"></div>
-    <div id="status-text">Connecting to market data...</div>
-    <div id="countdown"></div>
+    <div id="live-dot" class="live-dot"></div>
+    <div id="status-text">Live — auto-refreshes every 60s</div>
+    <div id="countdown">Next refresh in 12s</div>
     <button id="refresh-btn" onclick="fetchAll()">⟳ REFRESH</button>
-    <div id="last-update"></div>
+    <div id="last-update">Last update: 01:46:04 PM</div>
   </div>
 
-  <div id="alert-bar"></div>
+  <div id="alert-bar"><div class="alert-pill" id="pill-IWM" style="border-color: rgba(255, 68, 102, 0.4);">
+        <div class="ap-sym">IWM</div>
+        <div class="ap-level" id="pill-price-IWM"><span class="dn-price">$261.42 (-1.72%)</span></div>
+        <div class="ap-status" id="pill-sig-IWM"><span style="color:#ff4466">❌ DN -1.72%</span></div></div><div class="alert-pill" id="pill-VIX">
+        <div class="ap-sym">VIX</div>
+        <div class="ap-level" id="pill-price-VIX">N/A</div>
+        <div class="ap-status" id="pill-sig-VIX">—</div></div><div class="alert-pill" id="pill-10_YR_YLD">
+        <div class="ap-sym">10-YR YLD</div>
+        <div class="ap-level" id="pill-price-10_YR_YLD">N/A</div>
+        <div class="ap-status" id="pill-sig-10_YR_YLD">—</div></div><div class="alert-pill" id="pill-GOLD">
+        <div class="ap-sym">GOLD</div>
+        <div class="ap-level" id="pill-price-GOLD">N/A</div>
+        <div class="ap-status" id="pill-sig-GOLD">—</div></div><div class="alert-pill" id="pill-USD_INDEX">
+        <div class="ap-sym">USD INDEX</div>
+        <div class="ap-level" id="pill-price-USD_INDEX">N/A</div>
+        <div class="ap-status" id="pill-sig-USD_INDEX">—</div></div><div class="alert-pill" id="pill-KRE__BANKS_" style="border-color: rgba(255, 68, 102, 0.4);">
+        <div class="ap-sym">KRE (BANKS)</div>
+        <div class="ap-level" id="pill-price-KRE__BANKS_"><span class="dn-price">$66.78 (-5.13%)</span></div>
+        <div class="ap-status" id="pill-sig-KRE__BANKS_"><span style="color:#ff4466">❌ DN -5.13%</span></div></div><div class="alert-pill" id="pill-SPY__S_P_" style="border-color: rgba(255, 68, 102, 0.4);">
+        <div class="ap-sym">SPY (S&amp;P)</div>
+        <div class="ap-level" id="pill-price-SPY__S_P_"><span class="dn-price">$686.00 (-0.48%)</span></div>
+        <div class="ap-status" id="pill-sig-SPY__S_P_"><span style="color:#ff4466">❌ DN -0.48%</span></div></div></div>
 </div>
 
-<div id="filter-bar"></div>
+<div id="filter-bar"><button class="tab-btn active">ALL SIGNALS</button><button class="tab-btn" style="border-color: rgb(30, 58, 95); color: rgb(90, 122, 154);">📈 Direct Proxies</button><button class="tab-btn" style="border-color: rgb(30, 58, 95); color: rgb(90, 122, 154);">🔴 Danger Signals</button><button class="tab-btn" style="border-color: rgb(30, 58, 95); color: rgb(90, 122, 154);">📊 Economic Indicators</button><button class="tab-btn" style="border-color: rgb(30, 58, 95); color: rgb(90, 122, 154);">🏦 Fed &amp; Policy</button></div>
 
 <div id="main">
-  <div id="watchlist-content"></div>
+  <div id="watchlist-content">
+        <div class="group">
+          <div class="group-header" style="border-bottom:1px solid #00ff8844;">
+            <div class="group-title" style="color:#00ff88;">📈 Direct Proxies</div>
+            <div class="group-sub">— MOVE WITH THE S FUND</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SYMBOL</th>
+                  <th>NAME</th>
+                  <th>LIVE PRICE / CHANGE</th>
+                  <th>SIGNAL</th>
+                  <th>THRESHOLD / NOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+          <tr id="row-IWM" class="even">
+            <td class="td-symbol" style="color:#00ff88; border-left:3px solid #00ff8855;">IWM</td>
+            <td class="td-name">iShares Russell 2000 ETF</td>
+            <td class="price-cell" id="price-row-IWM">
+      <div class="price-val">$261.42</div>
+      <div class="price-chg dn-price">▼ 4.570 <span class="price-pct">(-1.72%)</span></div></td>
+            <td id="signal-row-IWM"><span class="signal-badge sig-bad">❌ DN -1.72%</span></td>
+            <td class="td-note">
+              
+              Best real-time S Fund proxy
+            </td>
+          </tr>
+          <tr id="row-MDY" class="odd">
+            <td class="td-symbol" style="color:#00ff88; border-left:3px solid #00ff8855;">MDY</td>
+            <td class="td-name">S&amp;P MidCap 400 ETF</td>
+            <td class="price-cell" id="price-row-MDY">
+      <div class="price-val">$652.83</div>
+      <div class="price-chg dn-price">▼ 5.310 <span class="price-pct">(-0.81%)</span></div></td>
+            <td id="signal-row-MDY"><span class="signal-badge sig-bad">❌ DN -0.81%</span></td>
+            <td class="td-note">
+              
+              S Fund futures parked here
+            </td>
+          </tr>
+          <tr id="row-KRE" class="even">
+            <td class="td-symbol" style="color:#00ff88; border-left:3px solid #00ff8855;">KRE</td>
+            <td class="td-name">SPDR Regional Banking ETF</td>
+            <td class="price-cell" id="price-row-KRE">
+      <div class="price-val">$66.78</div>
+      <div class="price-chg dn-price">▼ 3.610 <span class="price-pct">(-5.13%)</span></div></td>
+            <td id="signal-row-KRE"><span class="signal-badge sig-bad">❌ DN -5.13%</span></td>
+            <td class="td-note">
+              
+              18% of S Fund is Financials
+            </td>
+          </tr>
+          <tr id="row-IYJ" class="odd">
+            <td class="td-symbol" style="color:#00ff88; border-left:3px solid #00ff8855;">IYJ</td>
+            <td class="td-name">iShares U.S. Industrials ETF</td>
+            <td class="price-cell" id="price-row-IYJ">
+      <div class="price-val">$160.93</div>
+      <div class="price-chg up-price">▲ 0.000 <span class="price-pct">(+0.00%)</span></div></td>
+            <td id="signal-row-IYJ"><span class="signal-badge sig-good">✅ UP +0.00%</span></td>
+            <td class="td-note">
+              
+              17.5% of S Fund is Industrials
+            </td>
+          </tr>
+          <tr id="row-SPY" class="even">
+            <td class="td-symbol" style="color:#00ff88; border-left:3px solid #00ff8855;">SPY</td>
+            <td class="td-name">S&amp;P 500 ETF (C Fund proxy)</td>
+            <td class="price-cell" id="price-row-SPY">
+      <div class="price-val">$686.00</div>
+      <div class="price-chg dn-price">▼ 3.300 <span class="price-pct">(-0.48%)</span></div></td>
+            <td id="signal-row-SPY"><span class="signal-badge sig-bad">❌ DN -0.48%</span></td>
+            <td class="td-note">
+              
+              Compare S vs C Fund momentum
+            </td>
+          </tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-header" style="border-bottom:1px solid #ff446644;">
+            <div class="group-title" style="color:#ff4466;">🔴 Danger Signals</div>
+            <div class="group-sub">— WHEN THESE RISE, S FUND HURTS</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SYMBOL</th>
+                  <th>NAME</th>
+                  <th>LIVE PRICE / CHANGE</th>
+                  <th>SIGNAL</th>
+                  <th>THRESHOLD / NOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+          <tr id="row-_VIX" class="even">
+            <td class="td-symbol" style="color:#ff4466; border-left:3px solid #ff446655;">^VIX</td>
+            <td class="td-name">CBOE Volatility Index</td>
+            <td class="price-cell" id="price-row-_VIX"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-_VIX"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              <span class="threshold">Alarm: &gt;20</span>
+              Fear gauge — 20+ caution, 30+ alarm
+            </td>
+          </tr>
+          <tr id="row-_TNX" class="odd">
+            <td class="td-symbol" style="color:#ff4466; border-left:3px solid #ff446655;">^TNX</td>
+            <td class="td-name">10-Year Treasury Yield</td>
+            <td class="price-cell" id="price-row-_TNX"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-_TNX"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              <span class="threshold">Watch: &gt;4.25%</span>
+              Rising rates crush small cap margins
+            </td>
+          </tr>
+          <tr id="row-_IRX" class="even">
+            <td class="td-symbol" style="color:#ff4466; border-left:3px solid #ff446655;">^IRX</td>
+            <td class="td-name">2-Year Treasury Yield</td>
+            <td class="price-cell" id="price-row-_IRX"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-_IRX"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              
+              Fed short-term rate expectations
+            </td>
+          </tr>
+          <tr id="row-DXY" class="odd">
+            <td class="td-symbol" style="color:#ff4466; border-left:3px solid #ff446655;">DXY</td>
+            <td class="td-name">U.S. Dollar Index</td>
+            <td class="price-cell" id="price-row-DXY"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-DXY"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              <span class="threshold">Watch: &gt;105</span>
+              Strong dollar = tighter conditions
+            </td>
+          </tr>
+          <tr id="row-GC_F" class="even">
+            <td class="td-symbol" style="color:#ff4466; border-left:3px solid #ff446655;">GC=F</td>
+            <td class="td-name">Gold Spot Price</td>
+            <td class="price-cell" id="price-row-GC_F"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-GC_F"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              <span class="threshold">Warn: &gt;$5,100</span>
+              Gold surge = fear / flight to safety
+            </td>
+          </tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-header" style="border-bottom:1px solid #ffaa0044;">
+            <div class="group-title" style="color:#ffaa00;">📊 Economic Indicators</div>
+            <div class="group-sub">— KEY MACRO BENCHMARKS</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SYMBOL</th>
+                  <th>NAME</th>
+                  <th>LIVE PRICE / CHANGE</th>
+                  <th>SIGNAL</th>
+                  <th>THRESHOLD / NOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+          <tr id="row-PCEPILFE" class="even">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">PCEPILFE</td>
+            <td class="td-name">Core PCE Inflation (FRED)</td>
+            <td class="price-cell" id="price-row-PCEPILFE"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-PCEPILFE"><span class="signal-badge sig-bad">🚨 HOT — 3.0%</span></td>
+            <td class="td-note">
+              <span class="threshold">Target: &lt;2.5%</span>
+              Fed's #1 gauge — last reading: 3.0% 🚨
+            </td>
+          </tr>
+          <tr id="row-CPIAUCSL" class="odd">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">CPIAUCSL</td>
+            <td class="td-name">CPI Year-over-Year (BLS)</td>
+            <td class="price-cell" id="price-row-CPIAUCSL"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-CPIAUCSL"><span class="signal-badge sig-caution">⚠️ 2.4% YoY</span></td>
+            <td class="td-note">
+              <span class="threshold">Watch: &lt;2.5%</span>
+              Headline inflation — last: 2.4% Jan
+            </td>
+          </tr>
+          <tr id="row-ISM_PMI" class="even">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">ISM PMI</td>
+            <td class="td-name">ISM Manufacturing PMI</td>
+            <td class="price-cell" id="price-row-ISM_PMI"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-ISM_PMI"><span class="signal-badge sig-bad">🚨 &lt;50 CONTRAC.</span></td>
+            <td class="td-note">
+              <span class="threshold">Need: &gt;50</span>
+              9 straight months contracting 🚨
+            </td>
+          </tr>
+          <tr id="row-GDP" class="odd">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">GDP</td>
+            <td class="td-name">U.S. GDP Growth (BEA)</td>
+            <td class="price-cell" id="price-row-GDP"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-GDP"><span class="signal-badge sig-bad">🚨 1.4% Q4</span></td>
+            <td class="td-note">
+              <span class="threshold">Healthy: &gt;2.5%</span>
+              Q4 2025: 1.4% — well below target 🚨
+            </td>
+          </tr>
+          <tr id="row-ICSA" class="even">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">ICSA</td>
+            <td class="td-name">Initial Jobless Claims (weekly)</td>
+            <td class="price-cell" id="price-row-ICSA"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-ICSA"><span class="signal-badge sig-good">✅ STABLE</span></td>
+            <td class="td-note">
+              <span class="threshold">Safe: &lt;220K</span>
+              Released every Thursday 8:30am ET
+            </td>
+          </tr>
+          <tr id="row-NFIB" class="odd">
+            <td class="td-symbol" style="color:#ffaa00; border-left:3px solid #ffaa0055;">NFIB</td>
+            <td class="td-name">NFIB Small Biz Optimism</td>
+            <td class="price-cell" id="price-row-NFIB"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-NFIB"><span class="signal-badge sig-caution">⚠️ WATCH</span></td>
+            <td class="td-note">
+              <span class="threshold">Healthy: &gt;100</span>
+              Surveys the companies IN the S Fund
+            </td>
+          </tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-header" style="border-bottom:1px solid #44aaff44;">
+            <div class="group-title" style="color:#44aaff;">🏦 Fed &amp; Policy</div>
+            <div class="group-sub">— FORWARD-LOOKING RATE SIGNALS</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SYMBOL</th>
+                  <th>NAME</th>
+                  <th>LIVE PRICE / CHANGE</th>
+                  <th>SIGNAL</th>
+                  <th>THRESHOLD / NOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+          <tr id="row-ZQ" class="even">
+            <td class="td-symbol" style="color:#44aaff; border-left:3px solid #44aaff55;">ZQ</td>
+            <td class="td-name">Fed Funds Futures (CME)</td>
+            <td class="price-cell" id="price-row-ZQ"><span style="color:#3a5a7a;">Market closed / N/A</span></td>
+            <td id="signal-row-ZQ"><span class="signal-badge sig-loading">— N/A</span></td>
+            <td class="td-note">
+              <span class="threshold">Next cut: Jul 2026</span>
+              Pricing in cuts = S Fund tailwind
+            </td>
+          </tr>
+          <tr id="row-T10Y2Y" class="odd">
+            <td class="td-symbol" style="color:#44aaff; border-left:3px solid #44aaff55;">T10Y2Y</td>
+            <td class="td-name">2s10s Yield Curve (FRED)</td>
+            <td class="price-cell" id="price-row-T10Y2Y"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-T10Y2Y"><span class="signal-badge sig-caution">⚠️ FLAT</span></td>
+            <td class="td-note">
+              <span class="threshold">Healthy: positive</span>
+              Steepening helps regional banks (18% S Fund)
+            </td>
+          </tr>
+          <tr id="row-FOMC" class="even">
+            <td class="td-symbol" style="color:#44aaff; border-left:3px solid #44aaff55;">FOMC</td>
+            <td class="td-name">Next FOMC Meeting</td>
+            <td class="price-cell" id="price-row-FOMC"><span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span></td>
+            <td id="signal-row-FOMC"><span class="signal-badge sig-neutral">📅 MAR 18-19</span></td>
+            <td class="td-note">
+              <span class="threshold">Mar 18–19, 2026</span>
+              Dovish = good | Hawkish = bad
+            </td>
+          </tr></tbody>
+            </table>
+          </div>
+        </div></div>
 
   <div id="sources">
     <div class="src-label">WHERE TO MONITOR THESE SIGNALS</div>
-    <div id="sources-grid"></div>
+    <div id="sources-grid">
+        <div class="src-card">
+          <div class="src-name">Yahoo Finance</div>
+          <div class="src-url">finance.yahoo.com</div>
+          <div class="src-note">IWM, KRE, MDY, IYJ, ^VIX, ^TNX, ^IRX, DXY, GC=F</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">FRED (St. Louis Fed)</div>
+          <div class="src-url">fred.stlouisfed.org</div>
+          <div class="src-note">PCEPILFE, CPIAUCSL, ICSA, T10Y2Y, GDP</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">ISM Website</div>
+          <div class="src-url">ism.ws</div>
+          <div class="src-note">ISM Manufacturing PMI (1st biz day of month)</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">CME Group</div>
+          <div class="src-url">cmegroup.com</div>
+          <div class="src-note">ZQ — Fed Funds Futures</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">BEA.gov</div>
+          <div class="src-url">bea.gov</div>
+          <div class="src-note">PCE and GDP releases</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">NFIB.com</div>
+          <div class="src-url">nfib.com</div>
+          <div class="src-note">Small Business Optimism Index (monthly)</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">Federalreserve.gov</div>
+          <div class="src-url">federalreserve.gov</div>
+          <div class="src-note">FOMC statements, minutes, rate decisions</div>
+        </div>
+        <div class="src-card">
+          <div class="src-name">Finnhub.io</div>
+          <div class="src-url">finnhub.io</div>
+          <div class="src-note">Live price feed powering this dashboard</div>
+        </div></div>
   </div>
 
   <div id="footer">TSP S FUND INTELLIGENCE · LIVE DATA VIA FINNHUB · FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE</div>
@@ -703,5 +1044,6 @@
   renderSources();
   fetchAll();
 </script>
-</body>
-</html>
+
+
+</body></html>
