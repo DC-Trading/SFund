@@ -13,7 +13,6 @@
     .terminal-label { font-size:10px; letter-spacing:4px; color:#3b7ec8; text-transform:uppercase; margin-bottom:4px; }
     .terminal-title { font-size:22px; font-weight:bold; color:#e8f4fd; letter-spacing:1px; }
     .terminal-subtitle { font-size:11px; color:#5a7a9a; margin-top:3px; }
-
     #overall-signal { background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; padding:10px 16px; min-width:210px; line-height:1.8; }
     .sig-label { font-size:9px; color:#3b7ec8; letter-spacing:2px; margin-bottom:4px; }
     .sig-value { font-size:16px; font-weight:bold; letter-spacing:1px; }
@@ -52,7 +51,6 @@
     .group-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:8px; }
     .group-title { font-size:13px; font-weight:bold; letter-spacing:1px; }
     .group-sub   { font-size:10px; color:#4a6a8a; letter-spacing:2px; }
-
     .table-wrap { overflow-x:auto; }
     table { width:100%; border-collapse:collapse; font-size:12px; }
     thead tr { background:#0a1220; }
@@ -83,7 +81,6 @@
     .sig-caution { background:#ffaa0022; color:#ffaa00; border:1px solid #ffaa0044; }
     .sig-neutral { background:#3b7ec822; color:#3b7ec8; border:1px solid #3b7ec844; }
     .sig-loading { background:#1a2a3a;   color:#5a7a9a; border:1px solid #2a4a6a;  }
-
     .threshold { background:#1a2a3a; border:1px solid #2a4a6a; border-radius:3px; padding:2px 7px; margin-right:6px; font-size:10px; color:#3b9ec8; white-space:nowrap; display:inline-block; margin-bottom:2px; }
     .skeleton { display:inline-block; background:linear-gradient(90deg,#1a2a3a 25%,#2a3a4a 50%,#1a2a3a 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:3px; height:12px; }
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
@@ -130,10 +127,7 @@
 <div id="filter-bar"></div>
 <div id="main">
   <div id="watchlist-content"></div>
-  <div id="sources">
-    <div class="src-label">DATA SOURCES</div>
-    <div id="sources-grid"></div>
-  </div>
+  <div id="sources"><div class="src-label">DATA SOURCES</div><div id="sources-grid"></div></div>
   <div id="footer">TSP S FUND INTELLIGENCE · FINNHUB · YAHOO FINANCE · FRED · FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE</div>
 </div>
 
@@ -142,50 +136,52 @@
   const FRED_KEY = "7a6cf55858969b817e221d06da1ee3ce";
   const FH_BASE  = "https://finnhub.io/api/v1";
   const YH_BASE  = "https://query1.finance.yahoo.com/v8/finance/chart/";
+  // Two CORS proxies — try first, fall back to second
+  const PROXY1   = "https://corsproxy.io/?";
+  const PROXY2   = "https://api.allorigins.win/raw?url=";
+  const FRED_BASE= "https://api.stlouisfed.org/fred/series/observations";
 
   // ── FOMC schedule ─────────────────────────────────────────────────────────
   const FOMC_DATES = [
-    { label:"Mar 18–19, 2026", date:new Date("2026-03-19") },
-    { label:"May 6–7, 2026",   date:new Date("2026-05-07") },
-    { label:"Jun 17–18, 2026", date:new Date("2026-06-18") },
-    { label:"Jul 28–29, 2026", date:new Date("2026-07-29") },
-    { label:"Sep 15–16, 2026", date:new Date("2026-09-16") },
-    { label:"Oct 27–28, 2026", date:new Date("2026-10-28") },
-    { label:"Dec 9–10, 2026",  date:new Date("2026-12-10") },
+    {label:"Mar 18–19, 2026",date:new Date("2026-03-19")},
+    {label:"May 6–7, 2026",  date:new Date("2026-05-07")},
+    {label:"Jun 17–18, 2026",date:new Date("2026-06-18")},
+    {label:"Jul 28–29, 2026",date:new Date("2026-07-29")},
+    {label:"Sep 15–16, 2026",date:new Date("2026-09-16")},
+    {label:"Oct 27–28, 2026",date:new Date("2026-10-28")},
+    {label:"Dec 9–10, 2026", date:new Date("2026-12-10")},
   ];
-  function getNextFOMC() {
-    const now = new Date();
-    return FOMC_DATES.find(f=>f.date>=now) || {label:"See federalreserve.gov", date:null};
+  function getNextFOMC(){
+    const now=new Date();
+    return FOMC_DATES.find(f=>f.date>=now)||{label:"See federalreserve.gov",date:null};
   }
 
   // ── Market hours ──────────────────────────────────────────────────────────
-  function getMarketStatus() {
-    const et   = new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
-    const day  = et.getDay();
-    const mins = et.getHours()*60+et.getMinutes();
-    if (day===0||day===6) return "closed";
-    if (mins>=570&&mins<960) return "open";
-    if (mins>=480&&mins<570) return "pre";
-    return "closed";
+  function getMarketStatus(){
+    const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
+    const day=et.getDay(), mins=et.getHours()*60+et.getMinutes();
+    if(day===0||day===6)return"closed";
+    if(mins>=570&&mins<960)return"open";
+    if(mins>=480&&mins<570)return"pre";
+    return"closed";
   }
-  function updateMarketStatus() {
-    const s  = getMarketStatus();
-    const el = document.getElementById("market-status");
-    if (s==="open")  { el.textContent="● MARKET OPEN";   el.className="market-status mkt-open";   }
-    else if(s==="pre"){ el.textContent="◐ PRE-MARKET";   el.className="market-status mkt-pre";    }
-    else             { el.textContent="○ MARKET CLOSED"; el.className="market-status mkt-closed"; }
+  function updateMarketStatus(){
+    const s=getMarketStatus(), el=document.getElementById("market-status");
+    if(s==="open"){el.textContent="● MARKET OPEN";el.className="market-status mkt-open";}
+    else if(s==="pre"){el.textContent="◐ PRE-MARKET";el.className="market-status mkt-pre";}
+    else{el.textContent="○ MARKET CLOSED";el.className="market-status mkt-closed";}
     el.id="market-status";
   }
 
   // ── Formatters ────────────────────────────────────────────────────────────
-  const fmtSign = n=>(n>=0?"+":"")+n.toFixed(2);
-  const isYld   = s=>["US10Y","US02Y","US30Y"].includes(s);
+  const fmtSign=n=>(n>=0?"+":"")+n.toFixed(2);
+  const isYld=s=>["US10Y","US02Y","US30Y"].includes(s);
   function fmtPrice(c,sym){
     if(c===null||c===undefined||isNaN(c))return null;
-    if(isYld(sym)) return c.toFixed(3)+"%";
-    if(c>10000) return "$"+c.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-    if(c>1000)  return "$"+c.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-    if(c>10)    return "$"+c.toFixed(2);
+    if(isYld(sym))return c.toFixed(3)+"%";
+    if(c>10000)return"$"+c.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    if(c>1000)return"$"+c.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    if(c>10)return"$"+c.toFixed(2);
     return c.toFixed(3);
   }
   function fmtChg(d,c,sym){
@@ -197,28 +193,26 @@
   }
 
   // ── Signal functions ──────────────────────────────────────────────────────
-  const priceUp   = q=>q.dp>=0?{cls:"sig-good",label:"✅ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-bad",label:"❌ DN "+fmtSign(q.dp)+"%"};
-  const priceDown = q=>q.dp>=0?{cls:"sig-bad",label:"❌ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
-  const vixSignal = q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ CAUTION "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
-  const tnxSignal = q=>q.c>=4.5?{cls:"sig-bad",label:"🚨 HIGH "+q.c.toFixed(3)+"%"}:q.c>=4.0?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(3)+"%"}:{cls:"sig-good",label:"✅ OK "+q.c.toFixed(3)+"%"};
-  const dxySignal = q=>q.c>=106?{cls:"sig-bad",label:"❌ STRONG "+q.c.toFixed(2)}:q.c>=103?{cls:"sig-caution",label:"⚠️ FIRM "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ WEAK "+q.c.toFixed(2)};
-  const goldSignal= q=>q.dp>=1?{cls:"sig-bad",label:"⚠️ SURGING "+fmtSign(q.dp)+"%"}:q.dp>=0?{cls:"sig-caution",label:"⚠️ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
-  const spreadSig = v=>v>=0.5?{cls:"sig-good",label:"✅ +"+v.toFixed(2)+"%"}:v>=0?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(2)+"%"}:{cls:"sig-bad",label:"🚨 INV. "+v.toFixed(2)+"%"};
-
-  // FRED signal fns
-  const pceSig  = v=>v>=3.0?{cls:"sig-bad",label:"🚨 HOT "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
-  const cpiSig  = v=>v>=3.0?{cls:"sig-bad",label:"🚨 "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
-  const ismSig  = v=>v>=52?{cls:"sig-good",label:"✅ EXP "+v.toFixed(1)}:v>=50?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(1)}:{cls:"sig-bad",label:"🚨 CONT. "+v.toFixed(1)};
-  const gdpSig  = v=>v>=2.5?{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"}:v>=1.5?{cls:"sig-caution",label:"⚠️ SLOW "+v.toFixed(1)+"%"}:{cls:"sig-bad",label:"🚨 WEAK "+v.toFixed(1)+"%"};
-  const jobSig  = v=>v>=250?{cls:"sig-bad",label:"🚨 "+Math.round(v/1000)+"K"}:v>=220?{cls:"sig-caution",label:"⚠️ "+Math.round(v/1000)+"K"}:{cls:"sig-good",label:"✅ "+Math.round(v/1000)+"K"};
-  const nfibSig = v=>v>=100?{cls:"sig-good",label:"✅ "+v.toFixed(1)}:v>=95?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)}:{cls:"sig-bad",label:"🚨 "+v.toFixed(1)};
+  const priceUp  =q=>q.dp>=0?{cls:"sig-good",label:"✅ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-bad",label:"❌ DN "+fmtSign(q.dp)+"%"};
+  const priceDown=q=>q.dp>=0?{cls:"sig-bad",label:"❌ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
+  const vixSignal=q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ CAUTION "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
+  const tnxSignal=q=>q.c>=4.5?{cls:"sig-bad",label:"🚨 HIGH "+q.c.toFixed(3)+"%"}:q.c>=4.0?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(3)+"%"}:{cls:"sig-good",label:"✅ OK "+q.c.toFixed(3)+"%"};
+  const dxySignal=q=>q.c>=106?{cls:"sig-bad",label:"❌ STRONG "+q.c.toFixed(2)}:q.c>=103?{cls:"sig-caution",label:"⚠️ FIRM "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ WEAK "+q.c.toFixed(2)};
+  const goldSig  =q=>q.dp>=1?{cls:"sig-bad",label:"⚠️ SURGING "+fmtSign(q.dp)+"%"}:q.dp>=0?{cls:"sig-caution",label:"⚠️ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
+  const spreadSig=v=>v>=0.5?{cls:"sig-good",label:"✅ +"+v.toFixed(2)+"%"}:v>=0?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(2)+"%"}:{cls:"sig-bad",label:"🚨 INV. "+v.toFixed(2)+"%"};
+  const pceSig   =v=>v>=3.0?{cls:"sig-bad",label:"🚨 HOT "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
+  const cpiSig   =v=>v>=3.0?{cls:"sig-bad",label:"🚨 "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
+  const ismSig   =v=>v>=52?{cls:"sig-good",label:"✅ EXP "+v.toFixed(1)}:v>=50?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(1)}:{cls:"sig-bad",label:"🚨 CONT. "+v.toFixed(1)};
+  const gdpSig   =v=>v>=2.5?{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"}:v>=1.5?{cls:"sig-caution",label:"⚠️ SLOW "+v.toFixed(1)+"%"}:{cls:"sig-bad",label:"🚨 WEAK "+v.toFixed(1)+"%"};
+  const jobSig   =v=>v>=250000?{cls:"sig-bad",label:"🚨 "+Math.round(v/1000)+"K"}:v>=220000?{cls:"sig-caution",label:"⚠️ "+Math.round(v/1000)+"K"}:{cls:"sig-good",label:"✅ "+Math.round(v/1000)+"K"};
+  const nfciSig  =v=>v<0?{cls:"sig-good",label:"✅ LOOSE "+v.toFixed(2)}:v<0.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(2)}:{cls:"sig-bad",label:"🚨 TIGHT "+v.toFixed(2)};
 
   // ── Watchlist ─────────────────────────────────────────────────────────────
-  const groups = [
+  const groups=[
     {
       id:"proxies",category:"📈 Direct Proxies",subtitle:"Move WITH the S Fund",color:"#00ff88",
       items:[
-        {symbol:"^DWCPF",source:"yahoo",cacheKey:"^DWCPF",name:"DJ U.S. Completion TSM Index",badge:"S FUND BENCHMARK",threshold:"",note:"Exact index the TSP S Fund tracks — most important number",signalFn:priceUp},
+        {symbol:"^DWCPF",source:"yahoo",cacheKey:"^DWCPF",name:"DJ U.S. Completion TSM Index",badge:"S FUND BENCHMARK",threshold:"",note:"Exact index the TSP S Fund tracks",signalFn:priceUp},
         {symbol:"RUT",source:"finnhub",cacheKey:"RUT",name:"Russell 2000 Index",badge:"SMALL CAP",threshold:"",note:"Small caps only — different from DWCPF",signalFn:priceUp},
         {symbol:"IWM",source:"finnhub",cacheKey:"IWM",name:"iShares Russell 2000 ETF",badge:"",threshold:"",note:"Best real-time small-cap ETF proxy",signalFn:priceUp},
         {symbol:"MDY",source:"finnhub",cacheKey:"MDY",name:"S&P MidCap 400 ETF",badge:"MID CAP",threshold:"",note:"Mid caps — in DWCPF but not RUT",signalFn:priceUp},
@@ -234,48 +228,46 @@
         {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"Watch: >4.25%",note:"Rising rates crush small cap margins",signalFn:tnxSignal},
         {symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Year Treasury Yield",badge:"",threshold:"",note:"Fed short-term rate expectations",signalFn:priceDown},
         {symbol:"DXY",source:"finnhub",cacheKey:"DXY",name:"U.S. Dollar Index",badge:"",threshold:"Watch: >105",note:"Strong dollar = tighter conditions",signalFn:dxySignal},
-        {symbol:"XAUUSD",source:"finnhub",cacheKey:"OANDA:XAUUSD",name:"Gold Spot (XAU/USD)",badge:"",threshold:"Warn: >$3,000",note:"Gold surge = fear/flight to safety",signalFn:goldSignal},
+        {symbol:"XAUUSD",source:"finnhub",cacheKey:"OANDA:XAUUSD",name:"Gold Spot (XAU/USD)",badge:"",threshold:"Warn: >$3,000",note:"Gold surge = fear/flight to safety",signalFn:goldSig},
       ]
     },
     {
       id:"economic",category:"📊 Economic Indicators",subtitle:"Live from FRED — auto-updates on release day",color:"#ffaa00",
       items:[
-        {symbol:"PCE",   source:"fred",fredId:"PCEPILFE",        name:"Core PCE Inflation",       badge:"FRED LIVE",threshold:"Target: <2.5%",  note:"Fed's #1 inflation gauge",             fredSigFn:pceSig, fredFmt:v=>v.toFixed(1)+"%"},
-        {symbol:"CPI",   source:"fred",fredId:"CPIAUCSL",        name:"CPI Year-over-Year",       badge:"FRED LIVE",threshold:"Watch: <2.5%",   note:"Headline consumer inflation (YoY calc)",fredSigFn:cpiSig, fredFmt:v=>v.toFixed(2)+"%", fredYoY:true},
-        {symbol:"ISM",   source:"fred",fredId:"NAPM",            name:"ISM Manufacturing PMI",    badge:"FRED LIVE",threshold:"Need: >50",      note:"Below 50 = contraction",               fredSigFn:ismSig, fredFmt:v=>v.toFixed(1)},
-        {symbol:"GDP",   source:"fred",fredId:"A191RL1Q225SBEA", name:"Real GDP Growth Rate",     badge:"FRED LIVE",threshold:"Healthy: >2.5%", note:"Quarterly annualized % change",         fredSigFn:gdpSig, fredFmt:v=>v.toFixed(1)+"%"},
-        {symbol:"JOBLESS",source:"fred",fredId:"ICSA",           name:"Initial Jobless Claims",   badge:"FRED LIVE",threshold:"Safe: <220K",    note:"Released every Thursday 8:30am ET",     fredSigFn:jobSig, fredFmt:v=>Math.round(v/1000)+"K weekly"},
-        {symbol:"NFIB",  source:"fred",fredId:"NFCI",            name:"Nat'l Financial Cond. Index",badge:"FRED LIVE",threshold:"Healthy: <0", note:"Negative = loose/healthy conditions",   fredSigFn:v=>v<0?{cls:"sig-good",label:"✅ "+v.toFixed(2)}:v<0.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(2)}:{cls:"sig-bad",label:"🚨 TIGHT "+v.toFixed(2)}, fredFmt:v=>v.toFixed(2)},
+        {symbol:"PCE",   source:"fred",fredId:"PCEPILFE",        name:"Core PCE Inflation",        badge:"FRED LIVE",threshold:"Target: <2.5%",  note:"Fed's #1 inflation gauge",              fredSigFn:pceSig, fredFmt:v=>v.toFixed(1)+"%"},
+        {symbol:"CPI",   source:"fred",fredId:"CPIAUCSL",        name:"CPI Year-over-Year",        badge:"FRED LIVE",threshold:"Watch: <2.5%",   note:"Headline consumer inflation (YoY calc)",fredSigFn:cpiSig, fredFmt:v=>v.toFixed(2)+"%",fredYoY:true},
+        {symbol:"ISM",   source:"fred",fredId:"NAPM",            name:"ISM Manufacturing PMI",     badge:"FRED LIVE",threshold:"Need: >50",      note:"Below 50 = contraction",                fredSigFn:ismSig, fredFmt:v=>v.toFixed(1)},
+        {symbol:"GDP",   source:"fred",fredId:"A191RL1Q225SBEA", name:"Real GDP Growth Rate",      badge:"FRED LIVE",threshold:"Healthy: >2.5%", note:"Quarterly annualized % change",          fredSigFn:gdpSig, fredFmt:v=>v.toFixed(1)+"%"},
+        {symbol:"JOBLESS",source:"fred",fredId:"ICSA",           name:"Initial Jobless Claims",    badge:"FRED LIVE",threshold:"Safe: <220K",    note:"Released every Thursday 8:30am ET",      fredSigFn:jobSig, fredFmt:v=>Math.round(v/1000)+"K weekly"},
+        {symbol:"NFCI",  source:"fred",fredId:"NFCI",            name:"Nat'l Financial Cond. Index",badge:"FRED LIVE",threshold:"Healthy: <0",  note:"Negative = loose/healthy conditions",    fredSigFn:nfciSig,fredFmt:v=>v.toFixed(2)},
       ]
     },
     {
       id:"fed",category:"🏦 Fed & Policy",subtitle:"Forward-looking rate signals",color:"#44aaff",
       items:[
-        {symbol:"US02Y", source:"finnhub",cacheKey:"US02Y", name:"2-Yr Treasury (Fed expectations)",badge:"",      threshold:"Falling = cuts near", note:"Best real-time Fed rate expectation signal",signalFn:priceDown},
-        {symbol:"US10Y", source:"finnhub",cacheKey:"US10Y", name:"10-Year Treasury Yield",           badge:"",      threshold:"",                    note:"Long-end growth/inflation expectations",    signalFn:priceDown},
-        {symbol:"US30Y", source:"finnhub",cacheKey:"US30Y", name:"30-Year Treasury Yield",           badge:"",      threshold:"",                    note:"Long-end inflation expectations",            signalFn:priceDown},
-        {symbol:"2s10s", source:"spread",                   name:"2s10s Yield Curve Spread",         badge:"LIVE CALC",threshold:"Healthy: positive",note:"Auto-calculated: US10Y minus US02Y",        spreadSigFn:spreadSig},
-        {symbol:"FOMC",  source:"fomc",                     name:"Next FOMC Meeting",                badge:"AUTO",  threshold:"",                    note:"Dovish = good | Hawkish = bad"},
+        {symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Yr Treasury (Fed expectations)",badge:"",threshold:"Falling = cuts near",note:"Best real-time Fed rate expectation signal",signalFn:priceDown},
+        {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"",note:"Long-end growth/inflation expectations",signalFn:priceDown},
+        {symbol:"US30Y",source:"finnhub",cacheKey:"US30Y",name:"30-Year Treasury Yield",badge:"",threshold:"",note:"Long-end inflation expectations",signalFn:priceDown},
+        {symbol:"2s10s",source:"spread",name:"2s10s Yield Curve Spread",badge:"LIVE CALC",threshold:"Healthy: positive",note:"Auto-calculated: US10Y minus US02Y every refresh",spreadSigFn:spreadSig},
+        {symbol:"FOMC", source:"fomc",  name:"Next FOMC Meeting",badge:"AUTO",threshold:"",note:"Dovish = good | Hawkish = bad"},
       ]
     }
   ];
 
-  const alertDefs = [
-    {label:"^DWCPF",   source:"yahoo",  cacheKey:"^DWCPF",      signalFn:priceUp},
-    {label:"RUT",      source:"finnhub",cacheKey:"RUT",          signalFn:priceUp},
-    {label:"IWM",      source:"finnhub",cacheKey:"IWM",          signalFn:priceUp},
-    {label:"VIX",      source:"finnhub",cacheKey:"VIX",          signalFn:vixSignal},
-    {label:"10-YR YLD",source:"finnhub",cacheKey:"US10Y",        signalFn:tnxSignal},
-    {label:"GOLD",     source:"finnhub",cacheKey:"OANDA:XAUUSD", signalFn:goldSignal},
-    {label:"USD INDEX",source:"finnhub",cacheKey:"DXY",          signalFn:dxySignal},
-    {label:"KRE BANKS",source:"finnhub",cacheKey:"KRE",          signalFn:priceUp},
-    {label:"SPY",      source:"finnhub",cacheKey:"SPY",          signalFn:priceUp},
+  const alertDefs=[
+    {label:"^DWCPF",  source:"yahoo",  cacheKey:"^DWCPF",      signalFn:priceUp},
+    {label:"RUT",     source:"finnhub",cacheKey:"RUT",          signalFn:priceUp},
+    {label:"IWM",     source:"finnhub",cacheKey:"IWM",          signalFn:priceUp},
+    {label:"VIX",     source:"finnhub",cacheKey:"VIX",          signalFn:vixSignal},
+    {label:"10-YR",   source:"finnhub",cacheKey:"US10Y",        signalFn:tnxSignal},
+    {label:"GOLD",    source:"finnhub",cacheKey:"OANDA:XAUUSD", signalFn:goldSig},
+    {label:"USD IDX", source:"finnhub",cacheKey:"DXY",          signalFn:dxySignal},
+    {label:"KRE",     source:"finnhub",cacheKey:"KRE",          signalFn:priceUp},
+    {label:"SPY",     source:"finnhub",cacheKey:"SPY",          signalFn:priceUp},
   ];
 
-  // ── Cache ─────────────────────────────────────────────────────────────────
-  const cache     = {};
-  const fredCache = {};
-  let activeFilter="all", countdownSec=60, countdownTimer=null;
+  const cache={}, fredCache={};
+  let activeFilter="all",countdownSec=60,countdownTimer=null;
 
   // ── Fetch helpers ─────────────────────────────────────────────────────────
   async function fetchFinnhub(sym){
@@ -295,45 +287,62 @@
       const data=await r.json();
       const meta=data?.chart?.result?.[0]?.meta;
       if(!meta)return null;
-      const c=meta.regularMarketPrice;
-      const pc=meta.chartPreviousClose||meta.previousClose;
+      const c=meta.regularMarketPrice,pc=meta.chartPreviousClose||meta.previousClose;
       if(!c)return null;
-      const d=c-pc, dp=pc?(d/pc)*100:0;
+      const d=c-pc,dp=pc?(d/pc)*100:0;
       return{c,d,dp,pc};
     }catch{return null;}
   }
 
-  // FRED via JSONP — bypasses CORS completely
-  function fetchFREDjsonp(seriesId){
-    return new Promise(resolve=>{
-      const cbName = "fredCb_"+seriesId.replace(/[^a-zA-Z0-9]/g,"_");
-      const timeout = setTimeout(()=>{ delete window[cbName]; resolve(null); }, 8000);
-      window[cbName] = data=>{
-        clearTimeout(timeout);
-        delete window[cbName];
-        try{
-          const obs = data?.observations?.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
-          if(!obs||obs.length===0){resolve(null);return;}
-          const latest = obs[obs.length-1];
-          resolve({value:parseFloat(latest.value), date:latest.date, all:obs});
-        }catch{resolve(null);}
-      };
-      const script=document.createElement("script");
-      script.src=`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=asc&limit=24&callback=${cbName}`;
-      script.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve(null);};
-      document.head.appendChild(script);
-    });
+  // FRED with dual-proxy fallback
+  async function fetchFREDraw(seriesId, limit=24){
+    const url=`${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=asc&limit=${limit}`;
+    // Try proxy 1
+    try{
+      const r=await fetch(PROXY1+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)});
+      if(r.ok){
+        const d=await r.json();
+        if(d?.observations)return d;
+      }
+    }catch{}
+    // Try proxy 2
+    try{
+      const r=await fetch(PROXY2+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)});
+      if(r.ok){
+        const txt=await r.text();
+        const d=JSON.parse(txt);
+        if(d?.observations)return d;
+      }
+    }catch{}
+    // Last resort: direct (works if CORS not blocked)
+    try{
+      const r=await fetch(url,{signal:AbortSignal.timeout(7000)});
+      if(r.ok){
+        const d=await r.json();
+        if(d?.observations)return d;
+      }
+    }catch{}
+    return null;
   }
 
-  // CPI YoY calculation from raw FRED data
+  async function fetchFRED(seriesId){
+    const data=await fetchFREDraw(seriesId,5);
+    if(!data)return null;
+    const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
+    if(!obs.length)return null;
+    const latest=obs[obs.length-1];
+    return{value:parseFloat(latest.value),date:latest.date};
+  }
+
   async function fetchCPIyoy(){
-    const result = await fetchFREDjsonp("CPIAUCSL");
-    if(!result||!result.all||result.all.length<13)return null;
-    const obs=result.all;
+    const data=await fetchFREDraw("CPIAUCSL",14);
+    if(!data)return null;
+    const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
+    if(obs.length<13)return null;
     const latest=parseFloat(obs[obs.length-1].value);
     const yearAgo=parseFloat(obs[obs.length-13].value);
     const yoy=((latest-yearAgo)/yearAgo)*100;
-    return{value:yoy, date:obs[obs.length-1].date};
+    return{value:yoy,date:obs[obs.length-1].date};
   }
 
   // ── Master fetch ──────────────────────────────────────────────────────────
@@ -342,7 +351,7 @@
     document.getElementById("refresh-btn").disabled=true;
     updateMarketStatus();
 
-    // Price symbols
+    // Price jobs
     const seen=new Set(),priceJobs=[];
     [...groups.flatMap(g=>g.items),...alertDefs].forEach(item=>{
       if(item.source==="finnhub"||item.source==="yahoo"){
@@ -350,7 +359,6 @@
         if(k&&!seen.has(k)){seen.add(k);priceJobs.push({key:k,source:item.source});}
       }
     });
-
     for(let i=0;i<priceJobs.length;i++){
       const{key,source}=priceJobs[i];
       const prev=cache[key]?.c??null;
@@ -369,10 +377,10 @@
       if(i<priceJobs.length-1)await sleep(150);
     }
 
-    // FRED data via JSONP
+    // FRED jobs — run in parallel for speed
     const fredItems=groups.flatMap(g=>g.items.filter(i=>i.source==="fred"));
     await Promise.all(fredItems.map(async item=>{
-      const result = item.fredYoY ? await fetchCPIyoy() : await fetchFREDjsonp(item.fredId);
+      const result=item.fredYoY?await fetchCPIyoy():await fetchFRED(item.fredId);
       if(result)fredCache[item.fredId]=result;
       updateRow(item);
     }));
@@ -404,10 +412,7 @@
     }
     const spread=q10.c-q02.c;
     const cls=spread>=0?"up-price":"dn-price";
-    const arrow=spread>=0?"▲":"▼";
-    prEl.innerHTML=`
-      <div class="price-val">${spread.toFixed(3)}%</div>
-      <div class="price-chg ${cls}">${arrow} 10Y ${q10.c.toFixed(3)}% − 2Y ${q02.c.toFixed(3)}%</div>`;
+    prEl.innerHTML=`<div class="price-val">${spread.toFixed(3)}%</div><div class="price-chg ${cls}">10Y ${q10.c.toFixed(3)}% − 2Y ${q02.c.toFixed(3)}%</div>`;
     const sig=spreadSig(spread);
     sgEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
   }
@@ -418,12 +423,8 @@
     const sgEl=document.getElementById("signal-"+rid);
     if(!prEl||!sgEl)return;
     const next=getNextFOMC();
-    let daysStr="";
-    if(next.date){
-      const days=Math.ceil((next.date-new Date())/(1000*60*60*24));
-      daysStr=`<div class="price-sub">in ${days} days</div>`;
-    }
-    prEl.innerHTML=`<div class="price-val" style="font-size:12px;">${next.label}</div>${daysStr}`;
+    const days=next.date?Math.ceil((next.date-new Date())/(864e5)):"";
+    prEl.innerHTML=`<div class="price-val" style="font-size:12px;">${next.label}</div>${days?`<div class="price-sub">in ${days} days</div>`:""}`;
     sgEl.innerHTML=`<span class="signal-badge sig-neutral">📅 UPCOMING</span>`;
   }
 
@@ -444,14 +445,12 @@
         return;
       }
       const v=cached.value;
-      const dt=cached.date?`<div class="price-sub">as of ${cached.date}</div>`:"";
       const txt=item.fredFmt?item.fredFmt(v):v.toFixed(2);
-      priceEl.innerHTML=`<div class="price-val">${txt}</div>${dt}`;
+      priceEl.innerHTML=`<div class="price-val">${txt}</div><div class="price-sub">as of ${cached.date}</div>`;
       const sig=item.fredSigFn(v);
       signalEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
       return;
     }
-
     if(item.source==="spread"||item.source==="fomc")return;
 
     const q=cache[item.cacheKey];
@@ -464,9 +463,7 @@
     const arrow=q.dp>=0?"▲":"▼";
     const priceTxt=fmtPrice(q.c,item.cacheKey)||q.c.toFixed(2);
     const chgTxt=fmtChg(q.d,q.c,item.cacheKey);
-    priceEl.innerHTML=`
-      <div class="price-val">${priceTxt}</div>
-      <div class="price-chg ${chgClass}">${arrow} ${chgTxt} <span>(${fmtSign(q.dp)}%)</span></div>`;
+    priceEl.innerHTML=`<div class="price-val">${priceTxt}</div><div class="price-chg ${chgClass}">${arrow} ${chgTxt} (${fmtSign(q.dp)}%)</div>`;
     const sig=item.signalFn(q);
     signalEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
   }
@@ -479,10 +476,7 @@
       const id="pill-"+safeId(a.label);
       const pill=document.createElement("div");
       pill.className="alert-pill";pill.id=id;
-      pill.innerHTML=`
-        <div class="ap-sym">${a.label}</div>
-        <div class="ap-level" id="${id}-price"><span class="skeleton" style="width:55px;"></span></div>
-        <div class="ap-sig"   id="${id}-sig"><span class="skeleton" style="width:65px;"></span></div>`;
+      pill.innerHTML=`<div class="ap-sym">${a.label}</div><div class="ap-level" id="${id}-price"><span class="skeleton" style="width:55px;"></span></div><div class="ap-sig" id="${id}-sig"><span class="skeleton" style="width:65px;"></span></div>`;
       bar.appendChild(pill);
     });
   }
@@ -507,38 +501,28 @@
 
   const sigColor=c=>({"sig-good":"#00cc66","sig-bad":"#ff4466","sig-caution":"#ffaa00"}[c]||"#3b7ec8");
 
-  // ── Overall signal ────────────────────────────────────────────────────────
   function updateOverallSignal(){
     let bad=0,caution=0,good=0;
     groups.forEach(g=>g.items.forEach(item=>{
       let sig=null;
-      if((item.source==="finnhub"||item.source==="yahoo")&&item.signalFn){
-        const q=cache[item.cacheKey];if(q)sig=item.signalFn(q);
-      }else if(item.source==="fred"&&item.fredSigFn){
-        const c=fredCache[item.fredId];if(c)sig=item.fredSigFn(c.value);
-      }else if(item.source==="spread"){
-        const q10=cache["US10Y"],q02=cache["US02Y"];
-        if(q10&&q02)sig=spreadSig(q10.c-q02.c);
-      }
+      if((item.source==="finnhub"||item.source==="yahoo")&&item.signalFn){const q=cache[item.cacheKey];if(q)sig=item.signalFn(q);}
+      else if(item.source==="fred"&&item.fredSigFn){const c=fredCache[item.fredId];if(c)sig=item.fredSigFn(c.value);}
+      else if(item.source==="spread"){const q10=cache["US10Y"],q02=cache["US02Y"];if(q10&&q02)sig=spreadSig(q10.c-q02.c);}
       if(!sig)return;
       if(sig.cls==="sig-bad")bad++;
       else if(sig.cls==="sig-caution")caution++;
       else good++;
     }));
     const total=bad+caution+good;
-    const valEl=document.getElementById("overall-val");
-    const noteEl=document.getElementById("overall-note");
+    const valEl=document.getElementById("overall-val"),noteEl=document.getElementById("overall-note");
     if(bad>=6){valEl.textContent="🚨 HIGH RISK";valEl.style.color="#ff4466";noteEl.textContent=`${bad} of ${total} signals negative`;}
     else if(bad>=3){valEl.textContent="⚠ NEAR-TERM CAUTION";valEl.style.color="#ff8844";noteEl.textContent=`${bad} of ${total} signals negative`;}
-    else if(caution>=4){valEl.textContent="⚠ MIXED SIGNALS";valEl.style.color="#ffaa00";noteEl.textContent=`${caution} of ${total} signals cautionary`;}
+    else if(caution>=4){valEl.textContent="⚠ MIXED SIGNALS";valEl.style.color="#ffaa00";noteEl.textContent=`${caution} of ${total} cautionary`;}
     else if(good>=5){valEl.textContent="✅ CONSTRUCTIVE";valEl.style.color="#00cc66";noteEl.textContent=`${good} of ${total} signals positive`;}
     else{valEl.textContent="— MONITORING";valEl.style.color="#3b7ec8";noteEl.textContent="Assessing live data...";}
   }
 
-  function setStatus(state,msg){
-    document.getElementById("live-dot").className=state;
-    document.getElementById("status-text").textContent=msg;
-  }
+  function setStatus(state,msg){document.getElementById("live-dot").className=state;document.getElementById("status-text").textContent=msg;}
 
   function startCountdown(){
     if(countdownTimer)clearInterval(countdownTimer);
@@ -552,37 +536,23 @@
     },1000);
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
   function renderGroups(){
     const container=document.getElementById("watchlist-content");
     container.innerHTML="";
     const visible=activeFilter==="all"?groups:groups.filter(g=>g.id===activeFilter);
     visible.forEach(g=>{
       const rows=g.items.map((item,i)=>{
-        const rid="row-"+safeId(item.symbol);
-        const ckey=item.cacheKey||"";
-        const badgeHtml=item.badge?`<span class="star-badge">${item.badge}</span>`:"";
+        const rid="row-"+safeId(item.symbol),ckey=item.cacheKey||"";
+        const badge=item.badge?`<span class="star-badge">${item.badge}</span>`:"";
         return`<tr id="${rid}" data-cachekey="${ckey}" class="${i%2===0?"even":"odd"}">
           <td class="td-symbol" style="color:${g.color};border-left:3px solid ${g.color}55;">${item.symbol}</td>
-          <td class="td-name">${item.name}${badgeHtml}</td>
+          <td class="td-name">${item.name}${badge}</td>
           <td class="price-cell" id="price-${rid}"><span class="skeleton" style="width:80px;"></span></td>
           <td id="signal-${rid}"><span class="signal-badge sig-loading">LOADING...</span></td>
           <td class="td-note">${item.threshold?`<span class="threshold">${item.threshold}</span>`:""}${item.note}</td>
         </tr>`;
       }).join("");
-      container.innerHTML+=`
-        <div class="group">
-          <div class="group-header" style="border-bottom:1px solid ${g.color}44;">
-            <div class="group-title" style="color:${g.color};">${g.category}</div>
-            <div class="group-sub">— ${g.subtitle.toUpperCase()}</div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>SYMBOL</th><th>NAME</th><th>LIVE PRICE / CHANGE</th><th>SIGNAL</th><th>THRESHOLD / NOTE</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>`;
+      container.innerHTML+=`<div class="group"><div class="group-header" style="border-bottom:1px solid ${g.color}44;"><div class="group-title" style="color:${g.color};">${g.category}</div><div class="group-sub">— ${g.subtitle.toUpperCase()}</div></div><div class="table-wrap"><table><thead><tr><th>SYMBOL</th><th>NAME</th><th>LIVE PRICE / CHANGE</th><th>SIGNAL</th><th>THRESHOLD / NOTE</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     });
     groups.forEach(g=>g.items.forEach(item=>{
       if(item.source==="fred"){if(fredCache[item.fredId])updateRow(item);}
@@ -606,25 +576,20 @@
       btn.textContent=g.category;
       btn.style.borderColor=activeFilter===g.id?g.color:"#1e3a5f";
       btn.style.color=activeFilter===g.id?g.color:"#5a7a9a";
-      btn.onclick=()=>{
-        activeFilter=activeFilter===g.id?"all":g.id;
-        renderTabs();renderGroups();
-        groups.forEach(g2=>g2.items.forEach(item=>updateRow(item)));
-        updateSpread();updateFOMC();updateAlertBar();
-      };
+      btn.onclick=()=>{activeFilter=activeFilter===g.id?"all":g.id;renderTabs();renderGroups();groups.forEach(g2=>g2.items.forEach(item=>updateRow(item)));updateSpread();updateFOMC();updateAlertBar();};
       bar.appendChild(btn);
     });
   }
 
   const sources=[
-    {name:"Yahoo Finance",     url:"finance.yahoo.com",     note:"^DWCPF — S Fund exact benchmark"},
-    {name:"Finnhub.io",        url:"finnhub.io",            note:"RUT, IWM, MDY, KRE, IYJ, SPY, VIX, US10Y, US02Y, US30Y, DXY, Gold"},
-    {name:"FRED API (JSONP)",  url:"fred.stlouisfed.org",   note:"PCE, CPI YoY, ISM PMI, GDP, Jobless Claims, NFCI — live on release day"},
-    {name:"2s10s Spread",      url:"Calculated live",       note:"US10Y minus US02Y — auto-computed every refresh"},
-    {name:"FOMC Calendar",     url:"federalreserve.gov",    note:"Auto-advancing — shows days until next meeting"},
-    {name:"BEA.gov",           url:"bea.gov",               note:"GDP and PCE source"},
-    {name:"ISM Website",       url:"ism.ws",                note:"ISM Manufacturing PMI"},
-    {name:"CME Group",         url:"cmegroup.com",          note:"Fed Funds Futures"},
+    {name:"Yahoo Finance",url:"finance.yahoo.com",note:"^DWCPF — S Fund exact benchmark"},
+    {name:"Finnhub.io",url:"finnhub.io",note:"RUT, IWM, MDY, KRE, IYJ, SPY, VIX, US10Y, US02Y, US30Y, DXY, Gold"},
+    {name:"FRED (corsproxy.io)",url:"fred.stlouisfed.org",note:"PCE, CPI YoY, ISM PMI, GDP, Jobless Claims, NFCI"},
+    {name:"2s10s Spread",url:"Calculated live",note:"US10Y minus US02Y — every refresh"},
+    {name:"FOMC Calendar",url:"federalreserve.gov",note:"Auto-advancing with days countdown"},
+    {name:"BEA.gov",url:"bea.gov",note:"GDP and PCE source"},
+    {name:"ISM Website",url:"ism.ws",note:"ISM Manufacturing PMI"},
+    {name:"CME Group",url:"cmegroup.com",note:"Fed Funds Futures"},
   ];
 
   function renderSources(){
@@ -632,7 +597,6 @@
     sources.forEach(s=>{grid.innerHTML+=`<div class="src-card"><div class="src-name">${s.name}</div><div class="src-url">${s.url}</div><div class="src-note">${s.note}</div></div>`;});
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
   document.getElementById("datestamp").textContent=
     "Dow Jones U.S. Completion TSM Index · "+
     new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
