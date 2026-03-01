@@ -7,7 +7,6 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     body { min-height:100vh; background:#090c12; color:#c8d6e8; font-family:'Courier New','Lucida Console',monospace; }
-
     #header { background:linear-gradient(135deg,#0d1526 0%,#111827 100%); border-bottom:1px solid #1e3a5f; padding:20px 28px 16px; position:sticky; top:0; z-index:100; }
     #header-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
     .terminal-label { font-size:10px; letter-spacing:4px; color:#3b7ec8; text-transform:uppercase; margin-bottom:4px; }
@@ -17,7 +16,6 @@
     .sig-label { font-size:9px; color:#3b7ec8; letter-spacing:2px; margin-bottom:4px; }
     .sig-value { font-size:16px; font-weight:bold; letter-spacing:1px; }
     .sig-note  { font-size:10px; color:#5a7a9a; }
-
     #status-bar { display:flex; align-items:center; gap:16px; margin-top:12px; padding-top:10px; border-top:1px solid #1a2a3a; flex-wrap:wrap; }
     #live-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; background:#00ff88; animation:pulse-green 2s infinite; }
     #live-dot.loading { background:#ffaa00; animation:pulse-yellow 1s infinite; }
@@ -34,18 +32,15 @@
     .mkt-open   { background:#00cc6622; color:#00cc66; border:1px solid #00cc6644; }
     .mkt-closed { background:#ff446622; color:#ff4466; border:1px solid #ff446644; }
     .mkt-pre    { background:#ffaa0022; color:#ffaa00; border:1px solid #ffaa0044; }
-
     #alert-bar { margin-top:14px; display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
     .alert-pill { background:#0a1628; border-radius:4px; padding:6px 10px; white-space:nowrap; flex-shrink:0; border:1px solid #1e3a5f; transition:border-color .3s; min-width:95px; }
     .ap-sym   { font-size:9px; color:#5a7a9a; letter-spacing:1px; margin-bottom:2px; }
     .ap-level { font-size:11px; font-weight:bold; }
     .ap-sig   { font-size:9px; margin-top:2px; }
-
     #filter-bar { display:flex; gap:6px; padding:14px 28px; border-bottom:1px solid #1a2a3a; overflow-x:auto; }
     .tab-btn { background:#0a1628; border:1px solid #1e3a5f; color:#5a7a9a; border-radius:4px; padding:6px 14px; font-size:10px; letter-spacing:1px; cursor:pointer; white-space:nowrap; font-family:inherit; transition:all .15s; }
     .tab-btn:hover { color:#c8d6e8; border-color:#3b6090; }
     .tab-btn.active { background:#1a3a5f; color:#e8f4fd; }
-
     #main { padding:16px 28px 40px; }
     .group { margin-bottom:28px; }
     .group-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:8px; }
@@ -69,12 +64,11 @@
     .up-price   { color:#00cc66; }
     .dn-price   { color:#ff4466; }
     .star-badge { display:inline-block; background:#3b7ec822; border:1px solid #3b7ec844; color:#3b9ec8; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:6px; vertical-align:middle; letter-spacing:1px; }
-
+    .fallback-tag { display:inline-block; background:#2a3a2a; border:1px solid #3a5a3a; color:#6a9a6a; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px; letter-spacing:1px; }
     @keyframes flash-green { 0%,100%{background:transparent} 50%{background:#00ff8822} }
     @keyframes flash-red   { 0%,100%{background:transparent} 50%{background:#ff446622} }
     .flash-up td { animation:flash-green .6s ease; }
     .flash-dn td { animation:flash-red   .6s ease; }
-
     .signal-badge { display:inline-block; padding:3px 8px; border-radius:3px; font-size:10px; font-weight:bold; letter-spacing:.5px; white-space:nowrap; }
     .sig-good    { background:#00cc6622; color:#00cc66; border:1px solid #00cc6644; }
     .sig-bad     { background:#ff446622; color:#ff4466; border:1px solid #ff446644; }
@@ -82,9 +76,6 @@
     .sig-neutral { background:#3b7ec822; color:#3b7ec8; border:1px solid #3b7ec844; }
     .sig-loading { background:#1a2a3a;   color:#5a7a9a; border:1px solid #2a4a6a;  }
     .threshold { background:#1a2a3a; border:1px solid #2a4a6a; border-radius:3px; padding:2px 7px; margin-right:6px; font-size:10px; color:#3b9ec8; white-space:nowrap; display:inline-block; margin-bottom:2px; }
-    .skeleton { display:inline-block; background:linear-gradient(90deg,#1a2a3a 25%,#2a3a4a 50%,#1a2a3a 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:3px; height:12px; }
-    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
     #sources { background:#0a1220; border:1px solid #1e3a5f; border-radius:6px; padding:18px 22px; margin-top:10px; }
     .src-label { font-size:10px; letter-spacing:3px; color:#3b7ec8; margin-bottom:12px; }
     #sources-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
@@ -99,7 +90,6 @@
   </style>
 </head>
 <body>
-
 <div id="header">
   <div id="header-top">
     <div>
@@ -123,7 +113,6 @@
   </div>
   <div id="alert-bar"></div>
 </div>
-
 <div id="filter-bar"></div>
 <div id="main">
   <div id="watchlist-content"></div>
@@ -136,13 +125,22 @@
   const FRED_KEY = "7a6cf55858969b817e221d06da1ee3ce";
   const FH_BASE  = "https://finnhub.io/api/v1";
   const YH_BASE  = "https://query1.finance.yahoo.com/v8/finance/chart/";
-  // Two CORS proxies — try first, fall back to second
   const PROXY1   = "https://corsproxy.io/?";
   const PROXY2   = "https://api.allorigins.win/raw?url=";
-  const FRED_BASE= "https://api.stlouisfed.org/fred/series/observations";
+
+  // ── Hardcoded fallback values (latest known as of Mar 1 2026) ────────────
+  // These display instantly and are replaced by live FRED data if available
+  const FRED_FALLBACKS = {
+    "PCEPILFE":        { value: 2.84,   date: "2026-01-01", isFallback: true },
+    "CPIAUCSL_YOY":    { value: 2.4,    date: "2026-01-01", isFallback: true },
+    "NAPM":            { value: 50.9,   date: "2026-02-01", isFallback: true },
+    "A191RL1Q225SBEA": { value: 2.3,    date: "2025-10-01", isFallback: true },
+    "ICSA":            { value: 216000, date: "2026-02-22", isFallback: true },
+    "NFCI":            { value: -0.28,  date: "2026-02-20", isFallback: true },
+  };
 
   // ── FOMC schedule ─────────────────────────────────────────────────────────
-  const FOMC_DATES = [
+  const FOMC_DATES=[
     {label:"Mar 18–19, 2026",date:new Date("2026-03-19")},
     {label:"May 6–7, 2026",  date:new Date("2026-05-07")},
     {label:"Jun 17–18, 2026",date:new Date("2026-06-18")},
@@ -151,22 +149,19 @@
     {label:"Oct 27–28, 2026",date:new Date("2026-10-28")},
     {label:"Dec 9–10, 2026", date:new Date("2026-12-10")},
   ];
-  function getNextFOMC(){
-    const now=new Date();
-    return FOMC_DATES.find(f=>f.date>=now)||{label:"See federalreserve.gov",date:null};
-  }
+  const getNextFOMC=()=>FOMC_DATES.find(f=>f.date>=new Date())||{label:"See federalreserve.gov",date:null};
 
   // ── Market hours ──────────────────────────────────────────────────────────
   function getMarketStatus(){
     const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
-    const day=et.getDay(), mins=et.getHours()*60+et.getMinutes();
+    const day=et.getDay(),mins=et.getHours()*60+et.getMinutes();
     if(day===0||day===6)return"closed";
     if(mins>=570&&mins<960)return"open";
     if(mins>=480&&mins<570)return"pre";
     return"closed";
   }
   function updateMarketStatus(){
-    const s=getMarketStatus(), el=document.getElementById("market-status");
+    const s=getMarketStatus(),el=document.getElementById("market-status");
     if(s==="open"){el.textContent="● MARKET OPEN";el.className="market-status mkt-open";}
     else if(s==="pre"){el.textContent="◐ PRE-MARKET";el.className="market-status mkt-pre";}
     else{el.textContent="○ MARKET CLOSED";el.className="market-status mkt-closed";}
@@ -195,12 +190,12 @@
   // ── Signal functions ──────────────────────────────────────────────────────
   const priceUp  =q=>q.dp>=0?{cls:"sig-good",label:"✅ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-bad",label:"❌ DN "+fmtSign(q.dp)+"%"};
   const priceDown=q=>q.dp>=0?{cls:"sig-bad",label:"❌ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
-  const vixSignal=q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ CAUTION "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
-  const tnxSignal=q=>q.c>=4.5?{cls:"sig-bad",label:"🚨 HIGH "+q.c.toFixed(3)+"%"}:q.c>=4.0?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(3)+"%"}:{cls:"sig-good",label:"✅ OK "+q.c.toFixed(3)+"%"};
-  const dxySignal=q=>q.c>=106?{cls:"sig-bad",label:"❌ STRONG "+q.c.toFixed(2)}:q.c>=103?{cls:"sig-caution",label:"⚠️ FIRM "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ WEAK "+q.c.toFixed(2)};
+  const vixSig   =q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ CAUTION "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
+  const tnxSig   =q=>q.c>=4.5?{cls:"sig-bad",label:"🚨 HIGH "+q.c.toFixed(3)+"%"}:q.c>=4.0?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(3)+"%"}:{cls:"sig-good",label:"✅ OK "+q.c.toFixed(3)+"%"};
+  const dxySig   =q=>q.c>=106?{cls:"sig-bad",label:"❌ STRONG "+q.c.toFixed(2)}:q.c>=103?{cls:"sig-caution",label:"⚠️ FIRM "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ WEAK "+q.c.toFixed(2)};
   const goldSig  =q=>q.dp>=1?{cls:"sig-bad",label:"⚠️ SURGING "+fmtSign(q.dp)+"%"}:q.dp>=0?{cls:"sig-caution",label:"⚠️ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
   const spreadSig=v=>v>=0.5?{cls:"sig-good",label:"✅ +"+v.toFixed(2)+"%"}:v>=0?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(2)+"%"}:{cls:"sig-bad",label:"🚨 INV. "+v.toFixed(2)+"%"};
-  const pceSig   =v=>v>=3.0?{cls:"sig-bad",label:"🚨 HOT "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
+  const pceSig   =v=>v>=3.0?{cls:"sig-bad",label:"🚨 HOT "+v.toFixed(2)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(2)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(2)+"%"};
   const cpiSig   =v=>v>=3.0?{cls:"sig-bad",label:"🚨 "+v.toFixed(1)+"%"}:v>=2.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(1)+"%"}:{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"};
   const ismSig   =v=>v>=52?{cls:"sig-good",label:"✅ EXP "+v.toFixed(1)}:v>=50?{cls:"sig-caution",label:"⚠️ FLAT "+v.toFixed(1)}:{cls:"sig-bad",label:"🚨 CONT. "+v.toFixed(1)};
   const gdpSig   =v=>v>=2.5?{cls:"sig-good",label:"✅ "+v.toFixed(1)+"%"}:v>=1.5?{cls:"sig-caution",label:"⚠️ SLOW "+v.toFixed(1)+"%"}:{cls:"sig-bad",label:"🚨 WEAK "+v.toFixed(1)+"%"};
@@ -224,22 +219,22 @@
     {
       id:"danger",category:"🔴 Danger Signals",subtitle:"When these rise, S Fund hurts",color:"#ff4466",
       items:[
-        {symbol:"VIX",source:"finnhub",cacheKey:"VIX",name:"CBOE Volatility Index",badge:"",threshold:"Alarm: >20",note:"Fear gauge — 20+ caution, 30+ alarm",signalFn:vixSignal},
-        {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"Watch: >4.25%",note:"Rising rates crush small cap margins",signalFn:tnxSignal},
+        {symbol:"VIX",source:"finnhub",cacheKey:"VIX",name:"CBOE Volatility Index",badge:"",threshold:"Alarm: >20",note:"Fear gauge — 20+ caution, 30+ alarm",signalFn:vixSig},
+        {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"Watch: >4.25%",note:"Rising rates crush small cap margins",signalFn:tnxSig},
         {symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Year Treasury Yield",badge:"",threshold:"",note:"Fed short-term rate expectations",signalFn:priceDown},
-        {symbol:"DXY",source:"finnhub",cacheKey:"DXY",name:"U.S. Dollar Index",badge:"",threshold:"Watch: >105",note:"Strong dollar = tighter conditions",signalFn:dxySignal},
+        {symbol:"DXY",source:"finnhub",cacheKey:"DXY",name:"U.S. Dollar Index",badge:"",threshold:"Watch: >105",note:"Strong dollar = tighter conditions",signalFn:dxySig},
         {symbol:"XAUUSD",source:"finnhub",cacheKey:"OANDA:XAUUSD",name:"Gold Spot (XAU/USD)",badge:"",threshold:"Warn: >$3,000",note:"Gold surge = fear/flight to safety",signalFn:goldSig},
       ]
     },
     {
       id:"economic",category:"📊 Economic Indicators",subtitle:"Live from FRED — auto-updates on release day",color:"#ffaa00",
       items:[
-        {symbol:"PCE",   source:"fred",fredId:"PCEPILFE",        name:"Core PCE Inflation",        badge:"FRED LIVE",threshold:"Target: <2.5%",  note:"Fed's #1 inflation gauge",              fredSigFn:pceSig, fredFmt:v=>v.toFixed(1)+"%"},
-        {symbol:"CPI",   source:"fred",fredId:"CPIAUCSL",        name:"CPI Year-over-Year",        badge:"FRED LIVE",threshold:"Watch: <2.5%",   note:"Headline consumer inflation (YoY calc)",fredSigFn:cpiSig, fredFmt:v=>v.toFixed(2)+"%",fredYoY:true},
-        {symbol:"ISM",   source:"fred",fredId:"NAPM",            name:"ISM Manufacturing PMI",     badge:"FRED LIVE",threshold:"Need: >50",      note:"Below 50 = contraction",                fredSigFn:ismSig, fredFmt:v=>v.toFixed(1)},
-        {symbol:"GDP",   source:"fred",fredId:"A191RL1Q225SBEA", name:"Real GDP Growth Rate",      badge:"FRED LIVE",threshold:"Healthy: >2.5%", note:"Quarterly annualized % change",          fredSigFn:gdpSig, fredFmt:v=>v.toFixed(1)+"%"},
-        {symbol:"JOBLESS",source:"fred",fredId:"ICSA",           name:"Initial Jobless Claims",    badge:"FRED LIVE",threshold:"Safe: <220K",    note:"Released every Thursday 8:30am ET",      fredSigFn:jobSig, fredFmt:v=>Math.round(v/1000)+"K weekly"},
-        {symbol:"NFCI",  source:"fred",fredId:"NFCI",            name:"Nat'l Financial Cond. Index",badge:"FRED LIVE",threshold:"Healthy: <0",  note:"Negative = loose/healthy conditions",    fredSigFn:nfciSig,fredFmt:v=>v.toFixed(2)},
+        {symbol:"PCE",    source:"fred",fredId:"PCEPILFE",        fallbackId:"PCEPILFE",        name:"Core PCE Inflation",         badge:"FRED LIVE",threshold:"Target: <2.5%",  note:"Fed's #1 inflation gauge",              fredSigFn:pceSig, fredFmt:v=>v.toFixed(2)+"%"},
+        {symbol:"CPI",    source:"fred",fredId:"CPIAUCSL_YOY",    fallbackId:"CPIAUCSL_YOY",    name:"CPI Year-over-Year",         badge:"FRED LIVE",threshold:"Watch: <2.5%",   note:"Headline consumer inflation (YoY calc)",fredSigFn:cpiSig, fredFmt:v=>v.toFixed(1)+"%", fredYoY:true, fredRealId:"CPIAUCSL"},
+        {symbol:"ISM",    source:"fred",fredId:"NAPM",            fallbackId:"NAPM",            name:"ISM Manufacturing PMI",      badge:"FRED LIVE",threshold:"Need: >50",      note:"Below 50 = contraction",                fredSigFn:ismSig, fredFmt:v=>v.toFixed(1)},
+        {symbol:"GDP",    source:"fred",fredId:"A191RL1Q225SBEA", fallbackId:"A191RL1Q225SBEA", name:"Real GDP Growth Rate",       badge:"FRED LIVE",threshold:"Healthy: >2.5%", note:"Quarterly annualized % change",          fredSigFn:gdpSig, fredFmt:v=>v.toFixed(1)+"%"},
+        {symbol:"JOBLESS",source:"fred",fredId:"ICSA",            fallbackId:"ICSA",            name:"Initial Jobless Claims",     badge:"FRED LIVE",threshold:"Safe: <220K",    note:"Released every Thursday 8:30am ET",      fredSigFn:jobSig, fredFmt:v=>Math.round(v/1000)+"K weekly"},
+        {symbol:"NFCI",   source:"fred",fredId:"NFCI",            fallbackId:"NFCI",            name:"Nat'l Financial Cond. Index",badge:"FRED LIVE",threshold:"Healthy: <0",    note:"Negative = loose/healthy conditions",    fredSigFn:nfciSig,fredFmt:v=>v.toFixed(2)},
       ]
     },
     {
@@ -258,10 +253,10 @@
     {label:"^DWCPF",  source:"yahoo",  cacheKey:"^DWCPF",      signalFn:priceUp},
     {label:"RUT",     source:"finnhub",cacheKey:"RUT",          signalFn:priceUp},
     {label:"IWM",     source:"finnhub",cacheKey:"IWM",          signalFn:priceUp},
-    {label:"VIX",     source:"finnhub",cacheKey:"VIX",          signalFn:vixSignal},
-    {label:"10-YR",   source:"finnhub",cacheKey:"US10Y",        signalFn:tnxSignal},
+    {label:"VIX",     source:"finnhub",cacheKey:"VIX",          signalFn:vixSig},
+    {label:"10-YR",   source:"finnhub",cacheKey:"US10Y",        signalFn:tnxSig},
     {label:"GOLD",    source:"finnhub",cacheKey:"OANDA:XAUUSD", signalFn:goldSig},
-    {label:"USD IDX", source:"finnhub",cacheKey:"DXY",          signalFn:dxySignal},
+    {label:"USD IDX", source:"finnhub",cacheKey:"DXY",          signalFn:dxySig},
     {label:"KRE",     source:"finnhub",cacheKey:"KRE",          signalFn:priceUp},
     {label:"SPY",     source:"finnhub",cacheKey:"SPY",          signalFn:priceUp},
   ];
@@ -294,55 +289,57 @@
     }catch{return null;}
   }
 
-  // FRED with dual-proxy fallback
-  async function fetchFREDraw(seriesId, limit=24){
-    const url=`${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=asc&limit=${limit}`;
+  // FRED fetch — sort desc, limit 2 = gets the most recent observation first
+  async function fetchFREDseries(seriesId, limit=2){
+    const url=`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=${limit}&observation_end=9999-01-01`;
     // Try proxy 1
     try{
-      const r=await fetch(PROXY1+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)});
-      if(r.ok){
-        const d=await r.json();
-        if(d?.observations)return d;
-      }
+      const r=await fetch(PROXY1+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const d=await r.json();if(d?.observations)return d;}
     }catch{}
     // Try proxy 2
     try{
-      const r=await fetch(PROXY2+encodeURIComponent(url),{signal:AbortSignal.timeout(7000)});
-      if(r.ok){
-        const txt=await r.text();
-        const d=JSON.parse(txt);
-        if(d?.observations)return d;
-      }
+      const r=await fetch(PROXY2+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const txt=await r.text();const d=JSON.parse(txt);if(d?.observations)return d;}
     }catch{}
-    // Last resort: direct (works if CORS not blocked)
+    // Direct attempt
     try{
-      const r=await fetch(url,{signal:AbortSignal.timeout(7000)});
-      if(r.ok){
-        const d=await r.json();
-        if(d?.observations)return d;
-      }
+      const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const d=await r.json();if(d?.observations)return d;}
     }catch{}
     return null;
   }
 
   async function fetchFRED(seriesId){
-    const data=await fetchFREDraw(seriesId,5);
+    const data=await fetchFREDseries(seriesId,2);
     if(!data)return null;
     const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
     if(!obs.length)return null;
-    const latest=obs[obs.length-1];
-    return{value:parseFloat(latest.value),date:latest.date};
+    // desc order so first is latest
+    return{value:parseFloat(obs[0].value),date:obs[0].date,isFallback:false};
   }
 
   async function fetchCPIyoy(){
-    const data=await fetchFREDraw("CPIAUCSL",14);
+    // Get last 14 months descending, calculate YoY from index values
+    const data=await fetchFREDseries("CPIAUCSL",14);
     if(!data)return null;
     const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
     if(obs.length<13)return null;
-    const latest=parseFloat(obs[obs.length-1].value);
-    const yearAgo=parseFloat(obs[obs.length-13].value);
+    // desc order: obs[0]=latest, obs[12]=12 months ago
+    const latest=parseFloat(obs[0].value);
+    const yearAgo=parseFloat(obs[12].value);
     const yoy=((latest-yearAgo)/yearAgo)*100;
-    return{value:yoy,date:obs[obs.length-1].date};
+    return{value:yoy,date:obs[0].date,isFallback:false};
+  }
+
+  // ── Seed fallbacks immediately ────────────────────────────────────────────
+  function seedFallbacks(){
+    groups.flatMap(g=>g.items.filter(i=>i.source==="fred")).forEach(item=>{
+      if(!fredCache[item.fredId]&&FRED_FALLBACKS[item.fredId]){
+        fredCache[item.fredId]=FRED_FALLBACKS[item.fredId];
+        updateRow(item);
+      }
+    });
   }
 
   // ── Master fetch ──────────────────────────────────────────────────────────
@@ -350,6 +347,9 @@
     setStatus("loading","Fetching live market data...");
     document.getElementById("refresh-btn").disabled=true;
     updateMarketStatus();
+
+    // Seed fallbacks first so page shows data immediately
+    seedFallbacks();
 
     // Price jobs
     const seen=new Set(),priceJobs=[];
@@ -377,12 +377,15 @@
       if(i<priceJobs.length-1)await sleep(150);
     }
 
-    // FRED jobs — run in parallel for speed
+    // FRED jobs — parallel, replace fallbacks with live data if successful
     const fredItems=groups.flatMap(g=>g.items.filter(i=>i.source==="fred"));
     await Promise.all(fredItems.map(async item=>{
       const result=item.fredYoY?await fetchCPIyoy():await fetchFRED(item.fredId);
-      if(result)fredCache[item.fredId]=result;
-      updateRow(item);
+      if(result){
+        fredCache[item.fredId]=result;
+        updateRow(item);
+      }
+      // If result is null, fallback stays displayed — no change needed
     }));
 
     updateSpread();
@@ -413,8 +416,7 @@
     const spread=q10.c-q02.c;
     const cls=spread>=0?"up-price":"dn-price";
     prEl.innerHTML=`<div class="price-val">${spread.toFixed(3)}%</div><div class="price-chg ${cls}">10Y ${q10.c.toFixed(3)}% − 2Y ${q02.c.toFixed(3)}%</div>`;
-    const sig=spreadSig(spread);
-    sgEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
+    sgEl.innerHTML=`<span class="signal-badge ${spreadSig(spread).cls}">${spreadSig(spread).label}</span>`;
   }
 
   function updateFOMC(){
@@ -423,7 +425,7 @@
     const sgEl=document.getElementById("signal-"+rid);
     if(!prEl||!sgEl)return;
     const next=getNextFOMC();
-    const days=next.date?Math.ceil((next.date-new Date())/(864e5)):"";
+    const days=next.date?Math.ceil((next.date-new Date())/864e5):"";
     prEl.innerHTML=`<div class="price-val" style="font-size:12px;">${next.label}</div>${days?`<div class="price-sub">in ${days} days</div>`:""}`;
     sgEl.innerHTML=`<span class="signal-badge sig-neutral">📅 UPCOMING</span>`;
   }
@@ -440,13 +442,14 @@
     if(item.source==="fred"){
       const cached=fredCache[item.fredId];
       if(!cached){
-        priceEl.innerHTML=`<span class="skeleton" style="width:80px;"></span>`;
+        priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Loading FRED...</span>`;
         signalEl.innerHTML=`<span class="signal-badge sig-loading">LOADING...</span>`;
         return;
       }
       const v=cached.value;
       const txt=item.fredFmt?item.fredFmt(v):v.toFixed(2);
-      priceEl.innerHTML=`<div class="price-val">${txt}</div><div class="price-sub">as of ${cached.date}</div>`;
+      const fbTag=cached.isFallback?`<span class="fallback-tag">LAST KNOWN</span>`:"";
+      priceEl.innerHTML=`<div class="price-val">${txt}${fbTag}</div><div class="price-sub">as of ${cached.date}</div>`;
       const sig=item.fredSigFn(v);
       signalEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
       return;
@@ -476,7 +479,7 @@
       const id="pill-"+safeId(a.label);
       const pill=document.createElement("div");
       pill.className="alert-pill";pill.id=id;
-      pill.innerHTML=`<div class="ap-sym">${a.label}</div><div class="ap-level" id="${id}-price"><span class="skeleton" style="width:55px;"></span></div><div class="ap-sig" id="${id}-sig"><span class="skeleton" style="width:65px;"></span></div>`;
+      pill.innerHTML=`<div class="ap-sym">${a.label}</div><div class="ap-level" id="${id}-price">—</div><div class="ap-sig" id="${id}-sig">—</div>`;
       bar.appendChild(pill);
     });
   }
@@ -530,8 +533,7 @@
     const el=document.getElementById("countdown");
     el.textContent=`Next refresh in ${countdownSec}s`;
     countdownTimer=setInterval(()=>{
-      countdownSec--;
-      el.textContent=`Next refresh in ${countdownSec}s`;
+      countdownSec--;el.textContent=`Next refresh in ${countdownSec}s`;
       if(countdownSec<=0){clearInterval(countdownTimer);el.textContent="";fetchAll();}
     },1000);
   }
@@ -547,13 +549,14 @@
         return`<tr id="${rid}" data-cachekey="${ckey}" class="${i%2===0?"even":"odd"}">
           <td class="td-symbol" style="color:${g.color};border-left:3px solid ${g.color}55;">${item.symbol}</td>
           <td class="td-name">${item.name}${badge}</td>
-          <td class="price-cell" id="price-${rid}"><span class="skeleton" style="width:80px;"></span></td>
+          <td class="price-cell" id="price-${rid}"><span style="color:#3a5a7a;font-size:10px;">Loading...</span></td>
           <td id="signal-${rid}"><span class="signal-badge sig-loading">LOADING...</span></td>
           <td class="td-note">${item.threshold?`<span class="threshold">${item.threshold}</span>`:""}${item.note}</td>
         </tr>`;
       }).join("");
       container.innerHTML+=`<div class="group"><div class="group-header" style="border-bottom:1px solid ${g.color}44;"><div class="group-title" style="color:${g.color};">${g.category}</div><div class="group-sub">— ${g.subtitle.toUpperCase()}</div></div><div class="table-wrap"><table><thead><tr><th>SYMBOL</th><th>NAME</th><th>LIVE PRICE / CHANGE</th><th>SIGNAL</th><th>THRESHOLD / NOTE</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     });
+    // Render cached/fallback data immediately
     groups.forEach(g=>g.items.forEach(item=>{
       if(item.source==="fred"){if(fredCache[item.fredId])updateRow(item);}
       else if(item.source==="spread")updateSpread();
@@ -584,12 +587,9 @@
   const sources=[
     {name:"Yahoo Finance",url:"finance.yahoo.com",note:"^DWCPF — S Fund exact benchmark"},
     {name:"Finnhub.io",url:"finnhub.io",note:"RUT, IWM, MDY, KRE, IYJ, SPY, VIX, US10Y, US02Y, US30Y, DXY, Gold"},
-    {name:"FRED (corsproxy.io)",url:"fred.stlouisfed.org",note:"PCE, CPI YoY, ISM PMI, GDP, Jobless Claims, NFCI"},
-    {name:"2s10s Spread",url:"Calculated live",note:"US10Y minus US02Y — every refresh"},
+    {name:"FRED API",url:"fred.stlouisfed.org",note:"PCE, CPI YoY, ISM, GDP, Jobless Claims, NFCI — live on release day, fallback values shown otherwise"},
+    {name:"2s10s Spread",url:"Calculated live",note:"US10Y minus US02Y — computed every refresh"},
     {name:"FOMC Calendar",url:"federalreserve.gov",note:"Auto-advancing with days countdown"},
-    {name:"BEA.gov",url:"bea.gov",note:"GDP and PCE source"},
-    {name:"ISM Website",url:"ism.ws",note:"ISM Manufacturing PMI"},
-    {name:"CME Group",url:"cmegroup.com",note:"Fed Funds Futures"},
   ];
 
   function renderSources(){
