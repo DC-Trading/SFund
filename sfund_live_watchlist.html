@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TSP S Fund Live Watchlist</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #090c12;
+      color: #c8d6e8;
+      font-family: 'Courier New', 'Lucida Console', monospace;
+    }
+
+    /* ── Header ── */
+    #header {
+      background: linear-gradient(135deg, #0d1526 0%, #111827 100%);
+      border-bottom: 1px solid #1e3a5f;
+      padding: 20px 28px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    #header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .terminal-label {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: #3b7ec8;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .terminal-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #e8f4fd;
+      letter-spacing: 1px;
+    }
+    .terminal-subtitle {
+      font-size: 11px;
+      color: #5a7a9a;
+      margin-top: 3px;
+    }
+    #overall-signal {
+      background: #0a1628;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 11px;
+      line-height: 1.8;
+      min-width: 200px;
+    }
+    .sig-label { color: #3b7ec8; letter-spacing: 2px; margin-bottom: 4px; font-size: 9px; }
+    .sig-value { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+    .sig-note  { color: #5a7a9a; font-size: 10px; }
+
+    /* ── Status Bar ── */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #1a2a3a;
+      flex-wrap: wrap;
+    }
+    #live-dot {
+      width: 8px; height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 4px #00ff88; }
+      50%      { opacity: 0.4; box-shadow: none; }
+    }
+    #live-dot.loading { background: #ffaa00; animation: pulse-yellow 1s infinite; }
+    @keyframes pulse-yellow {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+    #live-dot.error { background: #ff4466; animation: none; }
+
+    #status-text { font-size: 10px; color: #5a7a9a; }
+    #last-update  { font-size: 10px; color: #3b6090; margin-left: auto; }
+
+    #refresh-btn {
+      background: #0a1628;
+      border: 1px solid #1e3a5f;
+      color: #3b9ec8;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 1px;
+      transition: all 0.15s;
+    }
+    #refresh-btn:hover { background: #1a3a5f; color: #e8f4fd; }
+
+    #countdown { font-size: 10px; color: #2a4a6a; }
+
+    /* ── Alert Bar ── */
+    #alert-bar {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .alert-pill {
+      background: #0a1628;
+      border-radius: 4px;
+      padding: 6px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border: 1px solid #1e3a5f;
+      transition: border-color 0.3s;
+    }
+    .alert-pill .ap-sym    { font-size: 9px; color: #5a7a9a; letter-spacing: 1px; }
+    .alert-pill .ap-status { font-size: 10px; font-weight: bold; }
+    .alert-pill .ap-level  { font-size: 10px; font-weight: bold; letter-spacing: 0.5px; }
+    .alert-pill .ap-change { font-size: 9px; }
+
+    /* ── Filter Tabs ── */
+    #filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 14px 28px;
+      border-bottom: 1px solid #1a2a3a;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: #0a1628;
+      border: 1px solid #1e3a5f;
+      color: #5a7a9a;
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { color: #c8d6e8; border-color: #3b6090; }
+    .tab-btn.active { background: #1a3a5f; color: #e8f4fd; }
+
+    /* ── Main ── */
+    #main { padding: 16px 28px 40px; }
+
+    .group { margin-bottom: 28px; }
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+    }
+    .group-title { font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+    .group-sub   { font-size: 10px; color: #4a6a8a; letter-spacing: 2px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead tr { background: #0a1220; }
+    th {
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #3b6090;
+      border-bottom: 1px solid #1a2a3a;
+      white-space: nowrap;
+      font-weight: normal;
+    }
+    td { padding: 10px 12px; vertical-align: middle; }
+    tr.even { background: #0b1422; }
+    tr.odd  { background: #090c12; }
+    tr:hover td { background: #0f1f35; }
+
+    .td-symbol {
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .td-name { color: #a0c0e0; min-width: 180px; }
+
+    /* Price cell */
+    .price-cell { white-space: nowrap; }
+    .price-val  { font-size: 13px; font-weight: bold; color: #e8f4fd; }
+    .price-chg  { font-size: 10px; margin-top: 2px; }
+    .price-pct  { font-size: 10px; }
+    .up-price   { color: #00cc66; }
+    .dn-price   { color: #ff4466; }
+    .neu-price  { color: #7a9ab8; }
+
+    /* Flash animation on update */
+    @keyframes flash-green { 0%,100%{background:transparent} 50%{background:#00ff8822} }
+    @keyframes flash-red   { 0%,100%{background:transparent} 50%{background:#ff446622} }
+    .flash-up { animation: flash-green 0.6s ease; }
+    .flash-dn { animation: flash-red   0.6s ease; }
+
+    /* Signal badge */
+    .signal-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .sig-good    { background: #00cc6622; color: #00cc66; border: 1px solid #00cc6644; }
+    .sig-bad     { background: #ff446622; color: #ff4466; border: 1px solid #ff446644; }
+    .sig-caution { background: #ffaa0022; color: #ffaa00; border: 1px solid #ffaa0044; }
+    .sig-neutral { background: #3b7ec822; color: #3b7ec8; border: 1px solid #3b7ec844; }
+    .sig-loading { background: #1a2a3a;   color: #5a7a9a; border: 1px solid #2a4a6a; }
+
+    .td-note { color: #5a7a9a; font-size: 11px; }
+    .threshold {
+      background: #1a2a3a;
+      border: 1px solid #2a4a6a;
+      border-radius: 3px;
+      padding: 2px 7px;
+      margin-right: 8px;
+      font-size: 10px;
+      color: #3b9ec8;
+      white-space: nowrap;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    /* Skeleton loader */
+    .skeleton {
+      display: inline-block;
+      background: linear-gradient(90deg, #1a2a3a 25%, #2a3a4a 50%, #1a2a3a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 3px;
+      height: 12px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* Sources */
+    #sources {
+      background: #0a1220;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 18px 22px;
+      margin-top: 10px;
+    }
+    #sources .src-label { font-size: 10px; letter-spacing: 3px; color: #3b7ec8; margin-bottom: 12px; }
+    #sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .src-card { background: #0d1626; border: 1px solid #1a2e4a; border-radius: 4px; padding: 10px 12px; }
+    .src-name { color: #3b9ec8; font-size: 11px; font-weight: bold; margin-bottom: 3px; }
+    .src-url  { color: #3a5a7a; font-size: 9px; margin-bottom: 5px; }
+    .src-note { color: #5a7a9a; font-size: 10px; line-height: 1.4; }
+
+    #footer { margin-top: 20px; text-align: center; font-size: 9px; color: #2a4a6a; letter-spacing: 2px; }
+
+    ::-webkit-scrollbar { height: 4px; width: 4px; }
+    ::-webkit-scrollbar-track { background: #0a1220; }
+    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div id="header-top">
+    <div>
+      <div class="terminal-label">TSP INTELLIGENCE TERMINAL · LIVE</div>
+      <div class="terminal-title">S FUND WATCHLIST</div>
+      <div class="terminal-subtitle" id="datestamp"></div>
+    </div>
+    <div id="overall-signal">
+      <div class="sig-label">OVERALL SIGNAL</div>
+      <div class="sig-value" id="overall-val">CALCULATING...</div>
+      <div class="sig-note" id="overall-note">Loading live data...</div>
+    </div>
+  </div>
+
+  <div id="status-bar">
+    <div id="live-dot" class="loading"></div>
+    <div id="status-text">Connecting to market data...</div>
+    <div id="countdown"></div>
+    <button id="refresh-btn" onclick="fetchAll()">⟳ REFRESH</button>
+    <div id="last-update"></div>
+  </div>
+
+  <div id="alert-bar"></div>
+</div>
+
+<div id="filter-bar"></div>
+
+<div id="main">
+  <div id="watchlist-content"></div>
+
+  <div id="sources">
+    <div class="src-label">WHERE TO MONITOR THESE SIGNALS</div>
+    <div id="sources-grid"></div>
+  </div>
+
+  <div id="footer">TSP S FUND INTELLIGENCE · LIVE DATA VIA FINNHUB · FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE</div>
+</div>
+
+<script>
+  const API_KEY = "d6i7bshr01ql9cif7kkgd6i7bshr01ql9cif7kl0";
+  const BASE    = "https://finnhub.io/api/v1";
+
+  // ── Watchlist definition ──────────────────────────────────────────────────
+  // finnhubSymbol: what to query; null = economic data (no live price)
+  const groups = [
+    {
+      id: "proxies", category: "📈 Direct Proxies",
+      subtitle: "Move WITH the S Fund", color: "#00ff88",
+      items: [
+        { symbol:"IWM",    finnhub:"IWM",    name:"iShares Russell 2000 ETF",      threshold:"",               note:"Best real-time S Fund proxy",          signalFn: priceUp },
+        { symbol:"MDY",    finnhub:"MDY",    name:"S&P MidCap 400 ETF",            threshold:"",               note:"S Fund futures parked here",           signalFn: priceUp },
+        { symbol:"KRE",    finnhub:"KRE",    name:"SPDR Regional Banking ETF",     threshold:"",               note:"18% of S Fund is Financials",          signalFn: priceUp },
+        { symbol:"IYJ",    finnhub:"IYJ",    name:"iShares U.S. Industrials ETF",  threshold:"",               note:"17.5% of S Fund is Industrials",       signalFn: priceUp },
+        { symbol:"SPY",    finnhub:"SPY",    name:"S&P 500 ETF (C Fund proxy)",    threshold:"",               note:"Compare S vs C Fund momentum",         signalFn: priceUp },
+      ]
+    },
+    {
+      id: "danger", category: "🔴 Danger Signals",
+      subtitle: "When these rise, S Fund hurts", color: "#ff4466",
+      items: [
+        { symbol:"^VIX",  finnhub:"VIX",   name:"CBOE Volatility Index",       threshold:"Alarm: >20",        note:"Fear gauge — 20+ caution, 30+ alarm",  signalFn: vixSignal },
+        { symbol:"^TNX",  finnhub:"TNX",   name:"10-Year Treasury Yield",      threshold:"Watch: >4.25%",     note:"Rising rates crush small cap margins",  signalFn: tnxSignal },
+        { symbol:"^IRX",  finnhub:"IRX",   name:"2-Year Treasury Yield",       threshold:"",                  note:"Fed short-term rate expectations",      signalFn: priceDown },
+        { symbol:"DXY",   finnhub:"DXY",   name:"U.S. Dollar Index",           threshold:"Watch: >105",       note:"Strong dollar = tighter conditions",    signalFn: priceDown },
+        { symbol:"GC=F",  finnhub:"GCUSD", name:"Gold Spot Price",             threshold:"Warn: >$5,100",     note:"Gold surge = fear / flight to safety",  signalFn: goldSignal },
+      ]
+    },
+    {
+      id: "economic", category: "📊 Economic Indicators",
+      subtitle: "Key macro benchmarks", color: "#ffaa00",
+      items: [
+        { symbol:"PCEPILFE", finnhub:null, name:"Core PCE Inflation (FRED)",       threshold:"Target: <2.5%",   note:"Fed's #1 gauge — last reading: 3.0% 🚨", staticSignal:"🚨 HOT — 3.0%",  staticClass:"sig-bad" },
+        { symbol:"CPIAUCSL", finnhub:null, name:"CPI Year-over-Year (BLS)",        threshold:"Watch: <2.5%",    note:"Headline inflation — last: 2.4% Jan",    staticSignal:"⚠️ 2.4% YoY",    staticClass:"sig-caution" },
+        { symbol:"ISM PMI",  finnhub:null, name:"ISM Manufacturing PMI",           threshold:"Need: >50",       note:"9 straight months contracting 🚨",        staticSignal:"🚨 <50 CONTRAC.", staticClass:"sig-bad" },
+        { symbol:"GDP",      finnhub:null, name:"U.S. GDP Growth (BEA)",           threshold:"Healthy: >2.5%",  note:"Q4 2025: 1.4% — well below target 🚨",   staticSignal:"🚨 1.4% Q4",     staticClass:"sig-bad" },
+        { symbol:"ICSA",     finnhub:null, name:"Initial Jobless Claims (weekly)", threshold:"Safe: <220K",     note:"Released every Thursday 8:30am ET",       staticSignal:"✅ STABLE",       staticClass:"sig-good" },
+        { symbol:"NFIB",     finnhub:null, name:"NFIB Small Biz Optimism",         threshold:"Healthy: >100",   note:"Surveys the companies IN the S Fund",     staticSignal:"⚠️ WATCH",        staticClass:"sig-caution" },
+      ]
+    },
+    {
+      id: "fed", category: "🏦 Fed & Policy",
+      subtitle: "Forward-looking rate signals", color: "#44aaff",
+      items: [
+        { symbol:"ZQ",      finnhub:"ZQ1!", name:"Fed Funds Futures (CME)",   threshold:"Next cut: Jul 2026",  note:"Pricing in cuts = S Fund tailwind",            signalFn: priceUp },
+        { symbol:"T10Y2Y",  finnhub:null,   name:"2s10s Yield Curve (FRED)",  threshold:"Healthy: positive",   note:"Steepening helps regional banks (18% S Fund)", staticSignal:"⚠️ FLAT",         staticClass:"sig-caution" },
+        { symbol:"FOMC",    finnhub:null,   name:"Next FOMC Meeting",         threshold:"Mar 18–19, 2026",     note:"Dovish = good | Hawkish = bad",                staticSignal:"📅 MAR 18-19",    staticClass:"sig-neutral" },
+      ]
+    }
+  ];
+
+  // ── Signal logic functions ────────────────────────────────────────────────
+  function priceUp(q)   { return q.dp >= 0 ? {cls:"sig-good",    label:"✅ UP " + fmt(q.dp) + "%"} : {cls:"sig-bad",     label:"❌ DN " + fmt(q.dp) + "%"}; }
+  function priceDown(q) { return q.dp >= 0 ? {cls:"sig-bad",     label:"❌ UP " + fmt(q.dp) + "%"} : {cls:"sig-good",    label:"✅ DN " + fmt(q.dp) + "%"}; }
+
+  function vixSignal(q) {
+    const v = q.c;
+    if (v >= 30)  return {cls:"sig-bad",     label:"🚨 ALARM " + fmt2(v)};
+    if (v >= 20)  return {cls:"sig-caution", label:"⚠️ CAUTION " + fmt2(v)};
+    return              {cls:"sig-good",    label:"✅ CALM " + fmt2(v)};
+  }
+
+  function tnxSignal(q) {
+    const v = q.c;
+    if (v >= 4.5)  return {cls:"sig-bad",     label:"🚨 HIGH " + fmt2(v) + "%"};
+    if (v >= 4.0)  return {cls:"sig-caution", label:"⚠️ ELEVATED " + fmt2(v) + "%"};
+    return               {cls:"sig-good",    label:"✅ OK " + fmt2(v) + "%"};
+  }
+
+  function goldSignal(q) {
+    if (q.dp >= 1.0)  return {cls:"sig-bad",     label:"⚠️ SURGING +" + fmt(q.dp) + "%"};
+    if (q.dp >= 0)    return {cls:"sig-caution", label:"⚠️ UP " + fmt(q.dp) + "%"};
+    return                  {cls:"sig-good",    label:"✅ DN " + fmt(q.dp) + "%"};
+  }
+
+  function fmt(n)  { return (n >= 0 ? "+" : "") + n.toFixed(2); }
+  function fmt2(n) { return n.toFixed(2); }
+  function fmtPrice(n) {
+    if (n === null || n === undefined || isNaN(n)) return "—";
+    if (n > 1000) return "$" + n.toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+    if (n > 10)   return "$" + n.toFixed(2);
+    return n.toFixed(3);
+  }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  const priceCache = {};
+  let activeFilter = "all";
+  let countdownSec = 60;
+  let countdownTimer = null;
+
+  // ── Fetch single quote ────────────────────────────────────────────────────
+  async function fetchQuote(finnhubSym) {
+    try {
+      const r = await fetch(`${BASE}/quote?symbol=${encodeURIComponent(finnhubSym)}&token=${API_KEY}`);
+      if (!r.ok) return null;
+      const d = await r.json();
+      if (!d || d.c === 0) return null;
+      return d; // { c, d, dp, h, l, o, pc }
+    } catch { return null; }
+  }
+
+  // ── Fetch all live symbols ────────────────────────────────────────────────
+  async function fetchAll() {
+    setStatus("loading", "Fetching live market data...");
+    document.getElementById("refresh-btn").disabled = true;
+
+    const symbols = [];
+    groups.forEach(g => g.items.forEach(item => {
+      if (item.finnhub) symbols.push({ item, sym: item.finnhub });
+    }));
+
+    // Batch with small delay to respect rate limits
+    for (let i = 0; i < symbols.length; i++) {
+      const { item, sym } = symbols[i];
+      const q = await fetchQuote(sym);
+      const prev = priceCache[sym];
+      priceCache[sym] = q;
+
+      // Flash updated rows
+      if (prev && q) {
+        const row = document.getElementById("row-" + item.symbol.replace(/[^a-zA-Z0-9]/g,"_"));
+        if (row && q.c !== prev.c) {
+          row.classList.remove("flash-up","flash-dn");
+          void row.offsetWidth;
+          row.classList.add(q.c > prev.c ? "flash-up" : "flash-dn");
+        }
+      }
+
+      updateRow(item);
+      if (i < symbols.length - 1) await sleep(120);
+    }
+
+    updateAlertBar();
+    updateOverallSignal();
+    setStatus("live", "Live — auto-refreshes every 60s");
+    document.getElementById("last-update").textContent =
+      "Last update: " + new Date().toLocaleTimeString("en-US", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+    document.getElementById("refresh-btn").disabled = false;
+    startCountdown();
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ── Update single row ─────────────────────────────────────────────────────
+  function updateRow(item) {
+    const q = item.finnhub ? priceCache[item.finnhub] : null;
+    const rowId = "row-" + item.symbol.replace(/[^a-zA-Z0-9]/g,"_");
+
+    const priceCell = document.getElementById("price-" + rowId);
+    const signalCell = document.getElementById("signal-" + rowId);
+    if (!priceCell || !signalCell) return;
+
+    if (!item.finnhub) {
+      // Static economic indicator
+      priceCell.innerHTML = `<span style="color:#3a5a7a;font-size:10px;">See FRED / BLS</span>`;
+      signalCell.innerHTML = `<span class="signal-badge ${item.staticClass}">${item.staticSignal}</span>`;
+      return;
+    }
+
+    if (!q) {
+      priceCell.innerHTML = `<span style="color:#3a5a7a;">Market closed / N/A</span>`;
+      signalCell.innerHTML = `<span class="signal-badge sig-loading">— N/A</span>`;
+      return;
+    }
+
+    const chgClass = q.dp >= 0 ? "up-price" : "dn-price";
+    const arrow    = q.dp >= 0 ? "▲" : "▼";
+    priceCell.innerHTML = `
+      <div class="price-val">${fmtPrice(q.c)}</div>
+      <div class="price-chg ${chgClass}">${arrow} ${fmtPrice(Math.abs(q.d))} <span class="price-pct">(${fmt(q.dp)}%)</span></div>`;
+
+    const sig = item.signalFn(q);
+    signalCell.innerHTML = `<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
+  }
+
+  // ── Alert Bar ─────────────────────────────────────────────────────────────
+  const alertDefs = [
+    { symbol:"IWM",    finnhub:"IWM",    label:"IWM",       signalFn: priceUp   },
+    { symbol:"^VIX",   finnhub:"VIX",    label:"VIX",       signalFn: vixSignal },
+    { symbol:"^TNX",   finnhub:"TNX",    label:"10-YR YLD", signalFn: tnxSignal },
+    { symbol:"GC=F",   finnhub:"GCUSD",  label:"GOLD",      signalFn: goldSignal},
+    { symbol:"DXY",    finnhub:"DXY",    label:"USD INDEX",  signalFn: priceDown },
+    { symbol:"KRE",    finnhub:"KRE",    label:"KRE (BANKS)",signalFn: priceUp  },
+    { symbol:"SPY",    finnhub:"SPY",    label:"SPY (S&P)",  signalFn: priceUp  },
+  ];
+
+  function buildAlertBar() {
+    const bar = document.getElementById("alert-bar");
+    bar.innerHTML = "";
+    alertDefs.forEach(a => {
+      const pill = document.createElement("div");
+      pill.className = "alert-pill";
+      pill.id = "pill-" + a.label.replace(/[^a-zA-Z0-9]/g,"_");
+      pill.innerHTML = `
+        <div class="ap-sym">${a.label}</div>
+        <div class="ap-level" id="pill-price-${a.label.replace(/[^a-zA-Z0-9]/g,"_")}"><span class="skeleton" style="width:50px;"></span></div>
+        <div class="ap-status" id="pill-sig-${a.label.replace(/[^a-zA-Z0-9]/g,"_")}"><span class="skeleton" style="width:60px;"></span></div>`;
+      bar.appendChild(pill);
+    });
+  }
+
+  function updateAlertBar() {
+    alertDefs.forEach(a => {
+      const q = priceCache[a.finnhub];
+      const priceEl = document.getElementById("pill-price-" + a.label.replace(/[^a-zA-Z0-9]/g,"_"));
+      const sigEl   = document.getElementById("pill-sig-"   + a.label.replace(/[^a-zA-Z0-9]/g,"_"));
+      const pill    = document.getElementById("pill-" + a.label.replace(/[^a-zA-Z0-9]/g,"_"));
+      if (!priceEl || !sigEl) return;
+      if (!q) {
+        priceEl.textContent = "N/A";
+        sigEl.textContent   = "—";
+        return;
+      }
+      const sig = a.signalFn(q);
+      const chgClass = q.dp >= 0 ? "up-price" : "dn-price";
+      priceEl.innerHTML = `<span class="${chgClass}">${fmtPrice(q.c)} (${fmt(q.dp)}%)</span>`;
+      sigEl.innerHTML   = `<span style="color:${sigClass2color(sig.cls)}">${sig.label}</span>`;
+      if (pill) pill.style.borderColor = sigClass2color(sig.cls) + "66";
+    });
+  }
+
+  function sigClass2color(cls) {
+    if (cls === "sig-good")    return "#00cc66";
+    if (cls === "sig-bad")     return "#ff4466";
+    if (cls === "sig-caution") return "#ffaa00";
+    return "#3b7ec8";
+  }
+
+  // ── Overall Signal ────────────────────────────────────────────────────────
+  function updateOverallSignal() {
+    let bad = 0, caution = 0, good = 0;
+    groups.forEach(g => g.items.forEach(item => {
+      if (!item.finnhub || !item.signalFn) return;
+      const q = priceCache[item.finnhub];
+      if (!q) return;
+      const s = item.signalFn(q);
+      if (s.cls === "sig-bad")     bad++;
+      else if (s.cls === "sig-caution") caution++;
+      else good++;
+    }));
+
+    const total = bad + caution + good;
+    const valEl  = document.getElementById("overall-val");
+    const noteEl = document.getElementById("overall-note");
+    if (bad >= 4)       { valEl.textContent = "⚠ NEAR-TERM CAUTION"; valEl.style.color = "#ff4466"; noteEl.textContent = `${bad} of ${total} signals negative`; }
+    else if (caution >= 4) { valEl.textContent = "⚠ MIXED SIGNALS";  valEl.style.color = "#ffaa00"; noteEl.textContent = `${caution} of ${total} signals cautionary`; }
+    else if (good >= 4) { valEl.textContent = "✅ CONSTRUCTIVE";     valEl.style.color = "#00cc66"; noteEl.textContent = `${good} of ${total} signals positive`; }
+    else                { valEl.textContent = "— MONITORING";        valEl.style.color = "#3b7ec8"; noteEl.textContent = "Assessing live data..."; }
+  }
+
+  // ── Status helpers ────────────────────────────────────────────────────────
+  function setStatus(state, msg) {
+    const dot  = document.getElementById("live-dot");
+    const text = document.getElementById("status-text");
+    dot.className = state === "live" ? "live-dot" : state === "loading" ? "loading" : "error";
+    dot.id = "live-dot";
+    text.textContent = msg;
+  }
+
+  // ── Countdown ─────────────────────────────────────────────────────────────
+  function startCountdown() {
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownSec = 60;
+    const el = document.getElementById("countdown");
+    el.textContent = `Next refresh in ${countdownSec}s`;
+    countdownTimer = setInterval(() => {
+      countdownSec--;
+      el.textContent = `Next refresh in ${countdownSec}s`;
+      if (countdownSec <= 0) {
+        clearInterval(countdownTimer);
+        el.textContent = "";
+        fetchAll();
+      }
+    }, 1000);
+  }
+
+  // ── Render static structure ───────────────────────────────────────────────
+  function renderGroups() {
+    const container = document.getElementById("watchlist-content");
+    container.innerHTML = "";
+    const visible = activeFilter === "all" ? groups : groups.filter(g => g.id === activeFilter);
+
+    visible.forEach(g => {
+      const rows = g.items.map((item, i) => {
+        const rowId = "row-" + item.symbol.replace(/[^a-zA-Z0-9]/g,"_");
+        return `
+          <tr id="${rowId}" class="${i % 2 === 0 ? "even" : "odd"}">
+            <td class="td-symbol" style="color:${g.color}; border-left:3px solid ${g.color}55;">${item.symbol}</td>
+            <td class="td-name">${item.name}</td>
+            <td class="price-cell" id="price-${rowId}">
+              <span class="skeleton" style="width:70px;"></span>
+            </td>
+            <td id="signal-${rowId}">
+              <span class="signal-badge sig-loading">LOADING...</span>
+            </td>
+            <td class="td-note">
+              ${item.threshold ? `<span class="threshold">${item.threshold}</span>` : ""}
+              ${item.note}
+            </td>
+          </tr>`;
+      }).join("");
+
+      container.innerHTML += `
+        <div class="group">
+          <div class="group-header" style="border-bottom:1px solid ${g.color}44;">
+            <div class="group-title" style="color:${g.color};">${g.category}</div>
+            <div class="group-sub">— ${g.subtitle.toUpperCase()}</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SYMBOL</th>
+                  <th>NAME</th>
+                  <th>LIVE PRICE / CHANGE</th>
+                  <th>SIGNAL</th>
+                  <th>THRESHOLD / NOTE</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    });
+
+    // Populate static economic rows immediately after render
+    groups.forEach(g => g.items.forEach(item => {
+      if (!item.finnhub) updateRow(item);
+    }));
+  }
+
+  function renderTabs() {
+    const bar = document.getElementById("filter-bar");
+    bar.innerHTML = "";
+    const allBtn = document.createElement("button");
+    allBtn.className = "tab-btn" + (activeFilter === "all" ? " active" : "");
+    allBtn.textContent = "ALL SIGNALS";
+    allBtn.onclick = () => { activeFilter = "all"; renderTabs(); renderGroups(); fetchAll(); };
+    bar.appendChild(allBtn);
+
+    groups.forEach(g => {
+      const btn = document.createElement("button");
+      btn.className = "tab-btn" + (activeFilter === g.id ? " active" : "");
+      btn.textContent = g.category;
+      btn.style.borderColor = activeFilter === g.id ? g.color : "#1e3a5f";
+      btn.style.color = activeFilter === g.id ? g.color : "#5a7a9a";
+      btn.onclick = () => {
+        activeFilter = activeFilter === g.id ? "all" : g.id;
+        renderTabs(); renderGroups();
+        // Re-populate from cache without re-fetching
+        groups.forEach(g2 => g2.items.forEach(item => updateRow(item)));
+        updateAlertBar();
+      };
+      bar.appendChild(btn);
+    });
+  }
+
+  const sources = [
+    { name:"Yahoo Finance",      url:"finance.yahoo.com",     note:"IWM, KRE, MDY, IYJ, ^VIX, ^TNX, ^IRX, DXY, GC=F" },
+    { name:"FRED (St. Louis Fed)",url:"fred.stlouisfed.org",  note:"PCEPILFE, CPIAUCSL, ICSA, T10Y2Y, GDP" },
+    { name:"ISM Website",        url:"ism.ws",                note:"ISM Manufacturing PMI (1st biz day of month)" },
+    { name:"CME Group",          url:"cmegroup.com",          note:"ZQ — Fed Funds Futures" },
+    { name:"BEA.gov",            url:"bea.gov",               note:"PCE and GDP releases" },
+    { name:"NFIB.com",           url:"nfib.com",              note:"Small Business Optimism Index (monthly)" },
+    { name:"Federalreserve.gov", url:"federalreserve.gov",    note:"FOMC statements, minutes, rate decisions" },
+    { name:"Finnhub.io",         url:"finnhub.io",            note:"Live price feed powering this dashboard" },
+  ];
+
+  function renderSources() {
+    const grid = document.getElementById("sources-grid");
+    sources.forEach(s => {
+      grid.innerHTML += `
+        <div class="src-card">
+          <div class="src-name">${s.name}</div>
+          <div class="src-url">${s.url}</div>
+          <div class="src-note">${s.note}</div>
+        </div>`;
+    });
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  document.getElementById("datestamp").textContent =
+    "Dow Jones U.S. Completion TSM Index · " +
+    new Date().toLocaleDateString("en-US", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+
+  buildAlertBar();
+  renderTabs();
+  renderGroups();
+  renderSources();
+  fetchAll();
+</script>
+</body>
+</html>
