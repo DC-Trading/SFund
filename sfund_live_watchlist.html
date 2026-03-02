@@ -3,46 +3,90 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TSP S Fund Live Watchlist</title>
+  <title>TSP S Fund Intelligence Terminal</title>
   <style>
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:07:56 PM 3/1/2026; }
     body { min-height:100vh; background:#090c12; color:#c8d6e8; font-family:'Courier New','Lucida Console',monospace; }
-    #header { background:linear-gradient(135deg,#0d1526 0%,#111827 100%); border-bottom:1px solid #1e3a5f; padding:20px 28px 16px; position:sticky; top:0; z-index:100; }
+
+    /* ── HEADER ── */
+    #header { background:linear-gradient(135deg,#0d1526 0%,#111827 100%); border-bottom:1px solid #1e3a5f; padding:18px 28px 14px; position:sticky; top:0; z-index:100; }
     #header-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
     .terminal-label { font-size:10px; letter-spacing:4px; color:#3b7ec8; text-transform:uppercase; margin-bottom:4px; }
-    .terminal-title { font-size:22px; font-weight:bold; color:#e8f4fd; letter-spacing:1px; }
+    .terminal-title { font-size:20px; font-weight:bold; color:#e8f4fd; letter-spacing:1px; }
     .terminal-subtitle { font-size:11px; color:#5a7a9a; margin-top:3px; }
-    #overall-signal { background:#0a1628; border:1px solid #1e3a5f; border-radius:6px; padding:10px 16px; min-width:210px; line-height:1.8; }
-    .sig-label { font-size:9px; color:#3b7ec8; letter-spacing:2px; margin-bottom:4px; }
-    .sig-value { font-size:16px; font-weight:bold; letter-spacing:1px; }
-    .sig-note  { font-size:10px; color:#5a7a9a; }
-    #status-bar { display:flex; align-items:center; gap:16px; margin-top:12px; padding-top:10px; border-top:1px solid #1a2a3a; flex-wrap:wrap; }
+    #status-bar { display:flex; align-items:center; gap:14px; margin-top:10px; padding-top:10px; border-top:1px solid #1a2a3a; flex-wrap:wrap; }
     #live-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; background:#00ff88; animation:pulse-green 2s infinite; }
     #live-dot.loading { background:#ffaa00; animation:pulse-yellow 1s infinite; }
-    #live-dot.error   { background:#ff4466; animation:none; }
     @keyframes pulse-green  { 0%,100%{opacity:1;box-shadow:0 0 4px #00ff88} 50%{opacity:.4;box-shadow:none} }
     @keyframes pulse-yellow { 0%,100%{opacity:1} 50%{opacity:.3} }
     #status-text { font-size:10px; color:#5a7a9a; }
     #last-update { font-size:10px; color:#3b6090; margin-left:auto; }
     #countdown   { font-size:10px; color:#2a4a6a; }
-    #refresh-btn { background:#0a1628; border:1px solid #1e3a5f; color:#3b9ec8; border-radius:4px; padding:4px 12px; font-size:10px; cursor:pointer; font-family:inherit; letter-spacing:1px; transition:all .15s; }
+    #refresh-btn { background:#0a1628; border:1px solid #1e3a5f; color:#3b9ec8; border-radius:4px; padding:4px 12px; font-size:10px; cursor:pointer; font-family:inherit; letter-spacing:1px; }
     #refresh-btn:hover { background:#1a3a5f; color:#e8f4fd; }
     #refresh-btn:disabled { opacity:.4; cursor:not-allowed; }
     #market-status { font-size:10px; padding:3px 10px; border-radius:3px; font-weight:bold; letter-spacing:1px; }
     .mkt-open   { background:#00cc6622; color:#00cc66; border:1px solid #00cc6644; }
     .mkt-closed { background:#ff446622; color:#ff4466; border:1px solid #ff446644; }
     .mkt-pre    { background:#ffaa0022; color:#ffaa00; border:1px solid #ffaa0044; }
-    #alert-bar { margin-top:14px; display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
-    .alert-pill { background:#0a1628; border-radius:4px; padding:6px 10px; white-space:nowrap; flex-shrink:0; border:1px solid #1e3a5f; transition:border-color .3s; min-width:95px; }
+    #alert-bar { margin-top:12px; display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
+    .alert-pill { background:#0a1628; border-radius:4px; padding:5px 10px; white-space:nowrap; flex-shrink:0; border:1px solid #1e3a5f; transition:border-color .3s; min-width:90px; }
     .ap-sym   { font-size:9px; color:#5a7a9a; letter-spacing:1px; margin-bottom:2px; }
     .ap-level { font-size:11px; font-weight:bold; }
     .ap-sig   { font-size:9px; margin-top:2px; }
+
+    /* ── DECISION PANEL ── */
+    #decision-panel { padding:16px 28px; border-bottom:1px solid #1a2a3a; }
+    .decision-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:800px){ .decision-grid{grid-template-columns:1fr;} }
+
+    .decision-card { border-radius:8px; padding:16px 18px; border:1px solid; }
+    .dc-gs { background:#0a1f0a; border-color:#00cc6633; }
+    .dc-sg { background:#1f0a0a; border-color:#ff446633; }
+
+    .dc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+    .dc-title { font-size:13px; font-weight:bold; letter-spacing:1px; }
+    .dc-gs .dc-title { color:#00cc66; }
+    .dc-sg .dc-title { color:#ff4466; }
+
+    .dc-verdict { font-size:11px; font-weight:bold; padding:4px 10px; border-radius:4px; letter-spacing:1px; white-space:nowrap; }
+    .verdict-no      { background:#1a2a3a; color:#5a7a9a; border:1px solid #2a4a6a; }
+    .verdict-watch   { background:#2a1f00; color:#ffaa00; border:1px solid #ffaa0066; }
+    .verdict-yellow  { background:#2a1800; color:#ffcc00; border:1px solid #ffcc0066; }
+    .verdict-go      { background:#002a10; color:#00ff88; border:1px solid #00ff8866; }
+    .verdict-override{ background:#2a0000; color:#ff4466; border:1px solid #ff446688; }
+
+    .dc-primaries { margin-bottom:10px; }
+    .dc-section-label { font-size:9px; letter-spacing:2px; color:#5a7a9a; margin-bottom:6px; }
+    .primary-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; font-size:11px; line-height:1.4; }
+    .pri-icon { font-size:13px; flex-shrink:0; margin-top:1px; }
+    .pri-text { color:#c8d6e8; }
+    .pri-detail { color:#7a9ab8; font-size:10px; margin-top:1px; }
+
+    .dc-summary { background:#ffffff08; border-radius:5px; padding:10px 12px; margin-top:10px; font-size:11px; line-height:1.6; border-left:3px solid; }
+    .dc-gs .dc-summary { border-color:#00cc6644; color:#a0d8a0; }
+    .dc-sg .dc-summary { border-color:#ff446644; color:#d8a0a0; }
+
+    .dc-trigger { margin-top:10px; padding:8px 12px; border-radius:5px; font-size:10px; line-height:1.6; }
+    .trigger-1115 { background:#1a1a2a; border:1px solid #3b7ec844; color:#88aaff; }
+    .trigger-eod  { background:#1a2a1a; border:1px solid #00cc6633; color:#88cc88; margin-top:6px; }
+    .trigger-sg-eod { background:#2a1a1a; border:1px solid #ff446633; color:#cc8888; margin-top:6px; }
+    .trigger-label { font-weight:bold; letter-spacing:1px; font-size:9px; display:block; margin-bottom:3px; }
+
+    .structure-counter { display:flex; gap:6px; margin-top:8px; align-items:center; font-size:10px; color:#7a9ab8; }
+    .day-dot { width:10px; height:10px; border-radius:50%; border:1px solid #3b7ec8; flex-shrink:0; }
+    .day-dot.filled { background:#00cc66; border-color:#00cc66; }
+    .day-dot.active { background:#ffaa00; border-color:#ffaa00; }
+
+    /* ── FILTER TABS ── */
     #filter-bar { display:flex; gap:6px; padding:14px 28px; border-bottom:1px solid #1a2a3a; overflow-x:auto; }
     .tab-btn { background:#0a1628; border:1px solid #1e3a5f; color:#5a7a9a; border-radius:4px; padding:6px 14px; font-size:10px; letter-spacing:1px; cursor:pointer; white-space:nowrap; font-family:inherit; transition:all .15s; }
     .tab-btn:hover { color:#c8d6e8; border-color:#3b6090; }
     .tab-btn.active { background:#1a3a5f; color:#e8f4fd; }
+
+    /* ── MAIN TABLE ── */
     #main { padding:16px 28px 40px; }
-    .group { margin-bottom:28px; }
+    .group { margin-bottom:24px; }
     .group-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:8px; }
     .group-title { font-size:13px; font-weight:bold; letter-spacing:1px; }
     .group-sub   { font-size:10px; color:#4a6a8a; letter-spacing:2px; }
@@ -50,32 +94,46 @@
     table { width:100%; border-collapse:collapse; font-size:12px; }
     thead tr { background:#0a1220; }
     th { padding:8px 12px; text-align:left; font-size:9px; letter-spacing:2px; color:#3b6090; border-bottom:1px solid #1a2a3a; white-space:nowrap; font-weight:normal; }
-    td { padding:10px 12px; vertical-align:middle; }
+    td { padding:10px 12px; vertical-align:top; }
     tr.even { background:#0b1422; }
     tr.odd  { background:#090c12; }
     tr:hover td { background:#0f1f35; }
-    .td-symbol { font-weight:bold; font-size:13px; letter-spacing:1px; white-space:nowrap; }
-    .td-name   { color:#a0c0e0; min-width:200px; }
-    .td-note   { color:#5a7a9a; font-size:11px; }
-    .price-cell { white-space:nowrap; min-width:160px; }
+    .td-symbol { font-weight:bold; font-size:13px; letter-spacing:1px; white-space:nowrap; vertical-align:middle; }
+    .td-name   { color:#a0c0e0; min-width:160px; vertical-align:middle; }
+    .price-cell { white-space:nowrap; min-width:150px; vertical-align:middle; }
     .price-val  { font-size:13px; font-weight:bold; color:#e8f4fd; }
     .price-sub  { font-size:10px; margin-top:2px; color:#5a7a9a; }
     .price-chg  { font-size:10px; margin-top:2px; }
     .up-price   { color:#00cc66; }
     .dn-price   { color:#ff4466; }
+    .signal-col { vertical-align:middle; min-width:140px; }
+
+    /* Notes column — rich explanation */
+    .notes-col { min-width:320px; max-width:420px; }
+    .note-mechanism { color:#7a9ab8; font-size:10px; line-height:1.5; margin-bottom:5px; }
+    .note-triggers { display:flex; flex-direction:column; gap:3px; }
+    .note-gs { font-size:10px; color:#6aba6a; line-height:1.4; }
+    .note-sg { font-size:10px; color:#ba6a6a; line-height:1.4; }
+    .note-arrow { font-size:9px; font-weight:bold; margin-right:3px; }
+
     .star-badge { display:inline-block; background:#3b7ec822; border:1px solid #3b7ec844; color:#3b9ec8; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:6px; vertical-align:middle; letter-spacing:1px; }
-    .fallback-tag { display:inline-block; background:#2a3a2a; border:1px solid #3a5a3a; color:#6a9a6a; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px; letter-spacing:1px; }
+    .primary-badge { display:inline-block; background:#ff446611; border:1px solid #ff446644; color:#ff8888; font-size:8px; padding:1px 4px; border-radius:3px; margin-left:4px; vertical-align:middle; letter-spacing:1px; }
+    .fallback-tag { display:inline-block; background:#2a3a2a; border:1px solid #3a5a3a; color:#6a9a6a; font-size:9px; padding:1px 4px; border-radius:3px; margin-left:4px; }
+
     @keyframes flash-green { 0%,100%{background:transparent} 50%{background:#00ff8822} }
     @keyframes flash-red   { 0%,100%{background:transparent} 50%{background:#ff446622} }
     .flash-up td { animation:flash-green .6s ease; }
     .flash-dn td { animation:flash-red   .6s ease; }
+
     .signal-badge { display:inline-block; padding:3px 8px; border-radius:3px; font-size:10px; font-weight:bold; letter-spacing:.5px; white-space:nowrap; }
     .sig-good    { background:#00cc6622; color:#00cc66; border:1px solid #00cc6644; }
     .sig-bad     { background:#ff446622; color:#ff4466; border:1px solid #ff446644; }
     .sig-caution { background:#ffaa0022; color:#ffaa00; border:1px solid #ffaa0044; }
     .sig-neutral { background:#3b7ec822; color:#3b7ec8; border:1px solid #3b7ec844; }
     .sig-loading { background:#1a2a3a;   color:#5a7a9a; border:1px solid #2a4a6a;  }
-    .threshold { background:#1a2a3a; border:1px solid #2a4a6a; border-radius:3px; padding:2px 7px; margin-right:6px; font-size:10px; color:#3b9ec8; white-space:nowrap; display:inline-block; margin-bottom:2px; }
+
+    .threshold { background:#1a2a3a; border:1px solid #2a4a6a; border-radius:3px; padding:2px 6px; font-size:9px; color:#3b9ec8; white-space:nowrap; display:inline-block; margin-bottom:4px; }
+
     #sources { background:#0a1220; border:1px solid #1e3a5f; border-radius:6px; padding:18px 22px; margin-top:10px; }
     .src-label { font-size:10px; letter-spacing:3px; color:#3b7ec8; margin-bottom:12px; }
     #sources-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
@@ -83,13 +141,15 @@
     .src-name { color:#3b9ec8; font-size:11px; font-weight:bold; margin-bottom:3px; }
     .src-url  { color:#3a5a7a; font-size:9px; margin-bottom:5px; }
     .src-note { color:#5a7a9a; font-size:10px; line-height:1.4; }
-    #footer { margin-top:20px; text-align:center; font-size:9px; color:#2a4a6a; letter-spacing:2px; }
+    #footer { margin-top:20px; text-align:center; font-size:9px; color:#2a4a6a; letter-spacing:2px; padding-bottom:20px; }
     ::-webkit-scrollbar { height:4px; width:4px; }
     ::-webkit-scrollbar-track { background:#0a1220; }
     ::-webkit-scrollbar-thumb { background:#1e3a5f; border-radius:2px; }
   </style>
 </head>
 <body>
+
+<!-- HEADER -->
 <div id="header">
   <div id="header-top">
     <div>
@@ -97,15 +157,10 @@
       <div class="terminal-title">S FUND WATCHLIST</div>
       <div class="terminal-subtitle" id="datestamp"></div>
     </div>
-    <div id="overall-signal">
-      <div class="sig-label">OVERALL SIGNAL</div>
-      <div class="sig-value" id="overall-val">CALCULATING...</div>
-      <div class="sig-note"  id="overall-note">Loading live data...</div>
-    </div>
   </div>
   <div id="status-bar">
     <div id="live-dot" class="loading"></div>
-    <div id="status-text">Connecting to market data...</div>
+    <div id="status-text">Connecting...</div>
     <div id="market-status" class="mkt-closed">○ MARKET CLOSED</div>
     <div id="countdown"></div>
     <button id="refresh-btn" onclick="fetchAll()">⟳ REFRESH</button>
@@ -113,11 +168,76 @@
   </div>
   <div id="alert-bar"></div>
 </div>
+
+<!-- DECISION PANEL -->
+<div id="decision-panel">
+  <div class="decision-grid">
+
+    <!-- G → S Card -->
+    <div class="decision-card dc-gs">
+      <div class="dc-header">
+        <div class="dc-title">⬆ G → S ENTRY (Risk ON)</div>
+        <div class="dc-verdict verdict-no" id="gs-verdict">CHECKING...</div>
+      </div>
+      <div class="dc-section-label">🔴 PRIMARY — ALL 4 REQUIRED</div>
+      <div class="dc-primaries" id="gs-primaries">
+        <div class="primary-row"><span class="pri-icon">⏳</span><div><div class="pri-text">Loading signals...</div></div></div>
+      </div>
+      <div class="dc-section-label" style="margin-top:8px;">🟡 SECONDARY — CONFIDENCE BUILDERS</div>
+      <div style="font-size:10px;color:#5a7a9a;line-height:1.6;">
+        Market breadth &gt;55% · Small caps outperform SPY · Credit spreads calm
+      </div>
+      <div class="dc-summary" id="gs-summary">Evaluating primary conditions...</div>
+      <div class="structure-counter">
+        <span>Structure hold days:</span>
+        <div class="day-dot" id="sd1"></div>
+        <div class="day-dot" id="sd2"></div>
+        <div class="day-dot" id="sd3"></div>
+        <span id="sd-label" style="color:#5a7a9a;">Track manually each close</span>
+      </div>
+      <div class="dc-trigger trigger-1115" id="gs-1115">
+        <span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>
+        Loading...
+      </div>
+      <div class="dc-trigger trigger-eod" id="gs-eod">
+        <span class="trigger-label">🌙 END OF DAY WATCH</span>
+        Loading...
+      </div>
+    </div>
+
+    <!-- S → G Card -->
+    <div class="decision-card dc-sg">
+      <div class="dc-header">
+        <div class="dc-title">⬇ S → G EXIT (Risk OFF)</div>
+        <div class="dc-verdict verdict-no" id="sg-verdict">CHECKING...</div>
+      </div>
+      <div class="dc-section-label">🔴 PRIMARY TRIGGERS — ANY 2 SUFFICIENT</div>
+      <div class="dc-primaries" id="sg-primaries">
+        <div class="primary-row"><span class="pri-icon">⏳</span><div><div class="pri-text">Loading signals...</div></div></div>
+      </div>
+      <div class="dc-section-label" style="margin-top:8px;">🚨 IMMEDIATE OVERRIDE — ANY ONE ALONE</div>
+      <div style="font-size:10px;color:#cc8888;line-height:1.6;" id="sg-override-status">
+        Hot inflation &gt;3% · VIX spike &gt;25 · Credit stress event · DWCPF structural breakdown
+      </div>
+      <div class="dc-summary" id="sg-summary">Evaluating exit conditions...</div>
+      <div class="dc-trigger trigger-1115" id="sg-1115">
+        <span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>
+        Loading...
+      </div>
+      <div class="dc-trigger trigger-sg-eod" id="sg-eod">
+        <span class="trigger-label">🌙 END OF DAY WATCH</span>
+        Loading...
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="filter-bar"></div>
 <div id="main">
   <div id="watchlist-content"></div>
   <div id="sources"><div class="src-label">DATA SOURCES</div><div id="sources-grid"></div></div>
-  <div id="footer">TSP S FUND INTELLIGENCE · FINNHUB · YAHOO FINANCE · FRED · FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE</div>
+  <div id="footer">TSP S FUND INTELLIGENCE · FINNHUB · YAHOO FINANCE · FRED · FOR INFORMATIONAL USE ONLY · NOT FINANCIAL ADVICE<br>TSP INTERFUND TRANSFERS MUST BE SUBMITTED BY 12:00 NOON ET</div>
 </div>
 
 <script>
@@ -128,18 +248,7 @@
   const PROXY1   = "https://corsproxy.io/?";
   const PROXY2   = "https://api.allorigins.win/raw?url=";
 
-  // ── Hardcoded fallback values (latest known as of Mar 1 2026) ────────────
-  // These display instantly and are replaced by live FRED data if available
-  const FRED_FALLBACKS = {
-    "PCEPILFE":        { value: 2.84,   date: "2026-01-01", isFallback: true },
-    "CPIAUCSL_YOY":    { value: 2.4,    date: "2026-01-01", isFallback: true },
-    "NAPM":            { value: 50.9,   date: "2026-02-01", isFallback: true },
-    "A191RL1Q225SBEA": { value: 2.3,    date: "2025-10-01", isFallback: true },
-    "ICSA":            { value: 216000, date: "2026-02-22", isFallback: true },
-    "NFCI":            { value: -0.28,  date: "2026-02-20", isFallback: true },
-  };
-
-  // ── FOMC schedule ─────────────────────────────────────────────────────────
+  // ── FOMC ──────────────────────────────────────────────────────────────────
   const FOMC_DATES=[
     {label:"Mar 18–19, 2026",date:new Date("2026-03-19")},
     {label:"May 6–7, 2026",  date:new Date("2026-05-07")},
@@ -151,6 +260,16 @@
   ];
   const getNextFOMC=()=>FOMC_DATES.find(f=>f.date>=new Date())||{label:"See federalreserve.gov",date:null};
 
+  // ── FRED fallbacks ────────────────────────────────────────────────────────
+  const FRED_FALLBACKS={
+    "PCEPILFE":        {value:2.84,  date:"2026-01-01",isFallback:true},
+    "CPIAUCSL_YOY":    {value:2.4,   date:"2026-01-01",isFallback:true},
+    "NAPM":            {value:50.9,  date:"2026-02-01",isFallback:true},
+    "A191RL1Q225SBEA": {value:2.3,   date:"2025-10-01",isFallback:true},
+    "ICSA":            {value:216000,date:"2026-02-22",isFallback:true},
+    "NFCI":            {value:-0.28, date:"2026-02-20",isFallback:true},
+  };
+
   // ── Market hours ──────────────────────────────────────────────────────────
   function getMarketStatus(){
     const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
@@ -159,6 +278,16 @@
     if(mins>=570&&mins<960)return"open";
     if(mins>=480&&mins<570)return"pre";
     return"closed";
+  }
+  function isNearNoon(){
+    const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
+    const mins=et.getHours()*60+et.getMinutes();
+    return mins>=675&&mins<720; // 11:15am–12:00pm
+  }
+  function isEOD(){
+    const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
+    const mins=et.getHours()*60+et.getMinutes();
+    return mins>=945&&mins<990; // 3:45pm–4:30pm
   }
   function updateMarketStatus(){
     const s=getMarketStatus(),el=document.getElementById("market-status");
@@ -190,7 +319,7 @@
   // ── Signal functions ──────────────────────────────────────────────────────
   const priceUp  =q=>q.dp>=0?{cls:"sig-good",label:"✅ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-bad",label:"❌ DN "+fmtSign(q.dp)+"%"};
   const priceDown=q=>q.dp>=0?{cls:"sig-bad",label:"❌ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
-  const vixSig   =q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ CAUTION "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
+  const vixSig   =q=>q.c>=30?{cls:"sig-bad",label:"🚨 ALARM "+q.c.toFixed(2)}:q.c>=20?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ CALM "+q.c.toFixed(2)};
   const tnxSig   =q=>q.c>=4.5?{cls:"sig-bad",label:"🚨 HIGH "+q.c.toFixed(3)+"%"}:q.c>=4.0?{cls:"sig-caution",label:"⚠️ ELEVATED "+q.c.toFixed(3)+"%"}:{cls:"sig-good",label:"✅ OK "+q.c.toFixed(3)+"%"};
   const dxySig   =q=>q.c>=106?{cls:"sig-bad",label:"❌ STRONG "+q.c.toFixed(2)}:q.c>=103?{cls:"sig-caution",label:"⚠️ FIRM "+q.c.toFixed(2)}:{cls:"sig-good",label:"✅ WEAK "+q.c.toFixed(2)};
   const goldSig  =q=>q.dp>=1?{cls:"sig-bad",label:"⚠️ SURGING "+fmtSign(q.dp)+"%"}:q.dp>=0?{cls:"sig-caution",label:"⚠️ UP "+fmtSign(q.dp)+"%"}:{cls:"sig-good",label:"✅ DN "+fmtSign(q.dp)+"%"};
@@ -202,49 +331,363 @@
   const jobSig   =v=>v>=250000?{cls:"sig-bad",label:"🚨 "+Math.round(v/1000)+"K"}:v>=220000?{cls:"sig-caution",label:"⚠️ "+Math.round(v/1000)+"K"}:{cls:"sig-good",label:"✅ "+Math.round(v/1000)+"K"};
   const nfciSig  =v=>v<0?{cls:"sig-good",label:"✅ LOOSE "+v.toFixed(2)}:v<0.5?{cls:"sig-caution",label:"⚠️ "+v.toFixed(2)}:{cls:"sig-bad",label:"🚨 TIGHT "+v.toFixed(2)};
 
-  // ── Watchlist ─────────────────────────────────────────────────────────────
+  // ── Decision logic ────────────────────────────────────────────────────────
+  function evaluateDecision(){
+    const q10=cache["US10Y"], q02=cache["US02Y"], qVIX=cache["VIX"];
+    const qDWCPF=cache["^DWCPF"], qRUT=cache["RUT"], qIWM=cache["IWM"];
+    const qKRE=cache["KRE"], qSPY=cache["SPY"];
+    const pce=fredCache["PCEPILFE"];
+
+    // ── G→S primary checks ─────────────────────────────────────────────────
+    const gs1 = q10 ? {ok: q10.dp<=0, label:"10-Yr Yield (TNX)", detail: q10.dp<=0 ? `Falling ${fmtSign(q10.dp)}% — rate pressure easing ✅` : `Rising ${fmtSign(q10.dp)}% — hurts small caps ❌`} : null;
+    const gs2 = qVIX ? {ok: qVIX.c<19, label:"VIX Volatility", detail: qVIX.c<19 ? `${qVIX.c.toFixed(2)} — fear compressed, safe to enter ✅` : `${qVIX.c.toFixed(2)} — fear elevated, wait for calm ❌`} : null;
+    const gs3 = qDWCPF ? {ok: qDWCPF.dp>=0, label:"DWCPF Structure", detail: qDWCPF.dp>=0 ? `+${qDWCPF.dp.toFixed(2)}% — reclaiming structure ✅` : `${fmtSign(qDWCPF.dp)}% — structure not confirmed ❌`} : null;
+    const gs4 = qRUT ? {ok: qRUT.dp>=0, label:"Russell 2000 (RUT)", detail: qRUT.dp>=0 ? `+${qRUT.dp.toFixed(2)}% — small caps leading ✅` : `${fmtSign(qRUT.dp)}% — small caps lagging ❌`} : null;
+
+    const gsPrimaries=[gs1,gs2,gs3,gs4].filter(Boolean);
+    const gsMetCount=gsPrimaries.filter(p=>p.ok).length;
+    const gsAllMet=gsMetCount===4&&gsPrimaries.length===4;
+    const gsDataAvailable=gsPrimaries.length>=2;
+
+    // ── S→G primary checks ─────────────────────────────────────────────────
+    const sg1 = q10 ? {ok: q10.dp>0.2, label:"TNX Rising", detail: q10.dp>0.2 ? `+${q10.dp.toFixed(3)}% — rising rates crushing margins 🚨` : `${fmtSign(q10.dp)}% — not a trigger`} : null;
+    const sg2 = qVIX ? {ok: qVIX.c>=20, label:"VIX Elevated", detail: qVIX.c>=20 ? `${qVIX.c.toFixed(2)} — fear rising, exit signal 🚨` : `${qVIX.c.toFixed(2)} — volatility contained`} : null;
+    const sg3 = qDWCPF ? {ok: qDWCPF.dp<=-1.5, label:"DWCPF Breaking", detail: qDWCPF.dp<=-1.5 ? `${fmtSign(qDWCPF.dp)}% — structural breakdown 🚨` : `${fmtSign(qDWCPF.dp)}% — holding`} : null;
+    const sg4 = qRUT ? {ok: qRUT.dp<=-1.5, label:"RUT Underperforming", detail: qRUT.dp<=-1.5 ? `${fmtSign(qRUT.dp)}% — small caps leading down 🚨` : `${fmtSign(qRUT.dp)}% — holding`} : null;
+
+    const sgPrimaries=[sg1,sg2,sg3,sg4].filter(Boolean);
+    const sgMetCount=sgPrimaries.filter(p=>p.ok).length;
+
+    // Override checks
+    const overrideVIX  = qVIX&&qVIX.c>=25;
+    const overridePCE  = pce&&pce.value>=3.0;
+    const overrideKRE  = qKRE&&qKRE.dp<=-4;
+    const overrideDWCPF= qDWCPF&&qDWCPF.dp<=-3;
+    const anyOverride  = overrideVIX||overridePCE||overrideKRE||overrideDWCPF;
+
+    // ── Render G→S card ────────────────────────────────────────────────────
+    const gsPrimEl=document.getElementById("gs-primaries");
+    if(gsPrimaries.length===0){
+      gsPrimEl.innerHTML=`<div class="primary-row"><span class="pri-icon">○</span><div class="pri-text" style="color:#5a7a9a;">Market closed — last close data</div></div>`;
+    } else {
+      gsPrimEl.innerHTML=gsPrimaries.map(p=>`
+        <div class="primary-row">
+          <span class="pri-icon">${p.ok?"✅":"❌"}</span>
+          <div>
+            <div class="pri-text" style="color:${p.ok?"#c8d6e8":"#888"}">${p.label}</div>
+            <div class="pri-detail">${p.detail}</div>
+          </div>
+        </div>`).join("");
+    }
+
+    const gsVerdictEl=document.getElementById("gs-verdict");
+    const gsSummEl=document.getElementById("gs-summary");
+    const gs1115El=document.getElementById("gs-1115");
+    const gsEodEl=document.getElementById("gs-eod");
+
+    if(!gsDataAvailable){
+      gsVerdictEl.textContent="NO DATA";gsVerdictEl.className="dc-verdict verdict-no";
+      gsSummEl.textContent="Waiting for market data...";
+    } else if(gsAllMet){
+      gsVerdictEl.textContent="✅ ENTRY FAVORED";gsVerdictEl.className="dc-verdict verdict-go";
+      gsSummEl.innerHTML=`All 4 primaries confirmed. <strong>If DWCPF has held structure for 2–3 days</strong>, this is a valid G→S entry. Act before noon today.`;
+    } else if(gsMetCount===3){
+      const missing=gsPrimaries.filter(p=>!p.ok).map(p=>p.label).join(", ");
+      gsVerdictEl.textContent="🟡 ALMOST";gsVerdictEl.className="dc-verdict verdict-yellow";
+      gsSummEl.innerHTML=`3 of 4 primaries met. <strong>Waiting on: ${missing}.</strong> Do not enter yet — one primary is blocking permission.`;
+    } else if(gsMetCount===2){
+      const met=gsPrimaries.filter(p=>p.ok).map(p=>p.label).join(", ");
+      gsVerdictEl.textContent="⚠ WATCH";gsVerdictEl.className="dc-verdict verdict-watch";
+      gsSummEl.innerHTML=`2 of 4 confirmed: <strong>${met}</strong>. Early setup forming but not enough for entry. Monitor for remaining primaries.`;
+    } else {
+      gsVerdictEl.textContent="❌ NOT YET";gsVerdictEl.className="dc-verdict verdict-no";
+      const met=gsMetCount>0?gsPrimaries.filter(p=>p.ok).map(p=>p.label).join(", "):"None";
+      gsSummEl.innerHTML=`${gsMetCount} of 4 primaries met (${met}). Conditions not supportive for S Fund entry.`;
+    }
+
+    // 11:15 trigger
+    const nearNoon=isNearNoon(), mktOpen=getMarketStatus()==="open";
+    if(nearNoon&&mktOpen){
+      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM — DECISION WINDOW OPEN — ${45-(new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})).getMinutes()-15)} MIN TO NOON</span>${gsAllMet?"<strong>✅ ALL PRIMARIES GREEN — CONSIDER G→S NOW</strong>":gsMetCount>=3?"<strong>⚠️ CLOSE — Missing "+gsPrimaries.filter(p=>!p.ok).map(p=>p.label).join(", ")+"</strong>":"<strong>❌ Conditions not met — hold G position</strong>"}`;
+    } else {
+      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>This fires Mon–Fri between 11:15am–12:00pm ET when you need to act. ${mktOpen?"Active now — "+gsMetCount+" of 4 primaries confirmed.":"Market closed."}`;
+    }
+
+    // EOD trigger
+    const eod=isEOD();
+    if(eod&&mktOpen){
+      gsEodEl.innerHTML=`<span class="trigger-label">🌙 END OF DAY — TOMORROW PREP</span>${gsMetCount>=3?"<strong>⚠️ Strong setup developing — watch pre-market tomorrow. Check if DWCPF holds overnight.</strong>":"Conditions: "+gsMetCount+" of 4. Not enough for tomorrow alert."}`;
+    } else {
+      gsEodEl.innerHTML=`<span class="trigger-label">🌙 END OF DAY WATCH (3:45–4pm ET)</span>Evaluates whether tomorrow is a potential entry day. Current setup: <strong>${gsMetCount} of 4 primaries</strong> confirmed at last check.`;
+    }
+
+    // ── Render S→G card ────────────────────────────────────────────────────
+    const sgPrimEl=document.getElementById("sg-primaries");
+    if(sgPrimaries.length===0){
+      sgPrimEl.innerHTML=`<div class="primary-row"><span class="pri-icon">○</span><div class="pri-text" style="color:#5a7a9a;">Market closed — last close data</div></div>`;
+    } else {
+      sgPrimEl.innerHTML=sgPrimaries.map(p=>`
+        <div class="primary-row">
+          <span class="pri-icon">${p.ok?"🚨":"✅"}</span>
+          <div>
+            <div class="pri-text" style="color:${p.ok?"#ff8888":"#88cc88"}">${p.label}</div>
+            <div class="pri-detail">${p.detail}</div>
+          </div>
+        </div>`).join("");
+    }
+
+    const sgVerdictEl=document.getElementById("sg-verdict");
+    const sgSummEl=document.getElementById("sg-summary");
+    const sg1115El=document.getElementById("sg-1115");
+    const sgEodEl=document.getElementById("sg-eod");
+    const sgOvEl=document.getElementById("sg-override-status");
+
+    // Override status
+    if(anyOverride){
+      const reasons=[];
+      if(overrideVIX)reasons.push(`VIX ${qVIX.c.toFixed(2)} — SPIKE ABOVE 25`);
+      if(overridePCE)reasons.push(`PCE ${pce.value.toFixed(2)}% — HOT INFLATION`);
+      if(overrideKRE)reasons.push(`KRE ${fmtSign(qKRE.dp)}% — BANK STRESS`);
+      if(overrideDWCPF)reasons.push(`DWCPF ${fmtSign(qDWCPF.dp)}% — STRUCTURAL BREAK`);
+      sgOvEl.innerHTML=`<strong style="color:#ff4466;">🚨 OVERRIDE TRIGGERED: ${reasons.join(" · ")}</strong>`;
+    } else {
+      sgOvEl.innerHTML=`No override conditions active. Hot inflation &gt;3% · VIX &gt;25 · KRE &lt;-4% · DWCPF &lt;-3%`;
+    }
+
+    if(anyOverride){
+      sgVerdictEl.textContent="🚨 EXIT NOW";sgVerdictEl.className="dc-verdict verdict-override";
+      sgSummEl.innerHTML=`<strong>Override condition triggered.</strong> Exit S Fund regardless of other signals. Capital protection is priority one.`;
+    } else if(sgMetCount>=2){
+      const triggered=sgPrimaries.filter(p=>p.ok).map(p=>p.label).join(", ");
+      sgVerdictEl.textContent="⚠ CONSIDER EXIT";sgVerdictEl.className="dc-verdict verdict-yellow";
+      sgSummEl.innerHTML=`2 of 4 triggers active: <strong>${triggered}</strong>. Risk-off conditions building. Review position — exit before noon if confirmed at 11:15am.`;
+    } else if(sgMetCount===1){
+      const triggered=sgPrimaries.filter(p=>p.ok).map(p=>p.label).join(", ");
+      sgVerdictEl.textContent="⚠ WATCH";sgVerdictEl.className="dc-verdict verdict-watch";
+      sgSummEl.innerHTML=`1 trigger active: <strong>${triggered}</strong>. Not enough to exit yet — but monitor closely. One more negative primary = consider move.`;
+    } else {
+      sgVerdictEl.textContent="✅ HOLD S";sgVerdictEl.className="dc-verdict verdict-go";
+      sgSummEl.innerHTML=`No exit triggers active. All primary conditions are supportive of holding S Fund. Continue monitoring.`;
+    }
+
+    // S→G 11:15 trigger
+    if(nearNoon&&mktOpen){
+      sg1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM — DECISION WINDOW OPEN</span>${anyOverride?"<strong>🚨 OVERRIDE — EXIT S FUND NOW</strong>":sgMetCount>=2?"<strong>⚠️ EXIT CONDITIONS MET — Consider S→G before noon</strong>":"<strong>✅ Hold S Fund — conditions supportive</strong>"}`;
+    } else {
+      sg1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>Fires Mon–Fri 11:15am–noon ET. ${mktOpen?"Active now — "+sgMetCount+" of 4 exit triggers active.":"Market closed."}`;
+    }
+
+    // S→G EOD
+    if(eod&&mktOpen){
+      sgEodEl.innerHTML=`<span class="trigger-label">🌙 END OF DAY — TOMORROW PREP</span>${sgMetCount>=1||anyOverride?"<strong>⚠️ Exit risk building — watch pre-market tomorrow. If triggers remain at 11:15am, consider S→G.</strong>":"Conditions stable. No exit signals building. Hold S Fund."}`;
+    } else {
+      sgEodEl.innerHTML=`<span class="trigger-label">🌙 END OF DAY WATCH (3:45–4pm ET)</span>Evaluates whether tomorrow may require an exit. Current status: <strong>${anyOverride?"OVERRIDE ACTIVE":sgMetCount+" of 4 triggers"}</strong>.`;
+    }
+  }
+
+  // ── Watchlist data ────────────────────────────────────────────────────────
   const groups=[
     {
       id:"proxies",category:"📈 Direct Proxies",subtitle:"Move WITH the S Fund",color:"#00ff88",
       items:[
-        {symbol:"^DWCPF",source:"yahoo",cacheKey:"^DWCPF",name:"DJ U.S. Completion TSM Index",badge:"S FUND BENCHMARK",threshold:"",note:"Exact index the TSP S Fund tracks",signalFn:priceUp},
-        {symbol:"RUT",source:"finnhub",cacheKey:"RUT",name:"Russell 2000 Index",badge:"SMALL CAP",threshold:"",note:"Small caps only — different from DWCPF",signalFn:priceUp},
-        {symbol:"IWM",source:"finnhub",cacheKey:"IWM",name:"iShares Russell 2000 ETF",badge:"",threshold:"",note:"Best real-time small-cap ETF proxy",signalFn:priceUp},
-        {symbol:"MDY",source:"finnhub",cacheKey:"MDY",name:"S&P MidCap 400 ETF",badge:"MID CAP",threshold:"",note:"Mid caps — in DWCPF but not RUT",signalFn:priceUp},
-        {symbol:"KRE",source:"finnhub",cacheKey:"KRE",name:"SPDR Regional Banking ETF",badge:"",threshold:"",note:"18% of S Fund is Financials",signalFn:priceUp},
-        {symbol:"IYJ",source:"finnhub",cacheKey:"IYJ",name:"iShares U.S. Industrials ETF",badge:"",threshold:"",note:"17.5% of S Fund is Industrials",signalFn:priceUp},
-        {symbol:"SPY",source:"finnhub",cacheKey:"SPY",name:"S&P 500 ETF (C Fund proxy)",badge:"C FUND",threshold:"",note:"Compare S vs C Fund momentum",signalFn:priceUp},
+        {
+          symbol:"^DWCPF",source:"yahoo",cacheKey:"^DWCPF",name:"DJ U.S. Completion TSM Index",badge:"S FUND BENCHMARK",
+          threshold:"G→S: Rising & holds 2-3 days · S→G: Breaks -1.5% or worse",
+          signalFn:priceUp,
+          mechanism:"This IS the S Fund. Tracks ~3,494 stocks — everything outside the S&P 500. Your fund rises and falls with this index daily.",
+          gs_note:"G→S: Must reclaim a key level AND hold it for 2-3 days. One up day is not enough — buyers must defend the level on a pullback.",
+          sg_note:"S→G: A single-day break below support of -1.5% or more, especially on rising volume, is a structural warning. Two consecutive down days = exit signal."
+        },
+        {
+          symbol:"RUT",source:"finnhub",cacheKey:"RUT",name:"Russell 2000 Index",badge:"SMALL CAP",
+          threshold:"G→S: Leading or confirming DWCPF · S→G: Underperforming SPY",
+          signalFn:priceUp,
+          mechanism:"Pure small-cap index. Tracks bottom 2,000 stocks in Russell 3000. Different from DWCPF (which includes mid-caps) but highly correlated. If RUT leads DWCPF up, it confirms real small-cap strength.",
+          gs_note:"G→S: RUT should be positive or outperforming SPY on the day. Small caps leading = risk appetite is genuine.",
+          sg_note:"S→G: If RUT underperforms SPY (SPY up but RUT flat or down), capital is rotating away from small caps — a warning sign."
+        },
+        {
+          symbol:"IWM",source:"finnhub",cacheKey:"IWM",name:"iShares Russell 2000 ETF",badge:"",
+          threshold:"Best real-time DWCPF proxy — updates every second",
+          signalFn:priceUp,
+          mechanism:"ETF version of the Russell 2000. Because DWCPF doesn't trade like a stock, IWM is your best real-time proxy for S Fund movement during the day. IWM moves = DWCPF moves.",
+          gs_note:"G→S: IWM trending up through 11:15am confirms the morning is supportive for entry.",
+          sg_note:"S→G: IWM rolling over and accelerating lower through 11:15am is a key exit signal. Watch for volume spikes on down moves."
+        },
+        {
+          symbol:"MDY",source:"finnhub",cacheKey:"MDY",name:"S&P MidCap 400 ETF",badge:"MID CAP",
+          threshold:"Included in DWCPF but not in RUT — tracks mid-cap health",
+          signalFn:priceUp,
+          mechanism:"Mid-caps make up a significant portion of DWCPF but are excluded from the Russell 2000. Watching MDY separately shows whether mid-cap strength is driving the S Fund.",
+          gs_note:"G→S: MDY rising with IWM = broad DWCPF strength across both size segments.",
+          sg_note:"S→G: MDY breaking down while IWM holds = mid-cap weakness could drag the S Fund even if small caps look OK."
+        },
+        {
+          symbol:"KRE",source:"finnhub",cacheKey:"KRE",name:"SPDR Regional Banking ETF",badge:"",
+          threshold:"G→S: Stable/rising · S→G: Single day -3% or worse is a warning",
+          signalFn:priceUp,
+          mechanism:"Regional banks are 18% of the S Fund — the single largest sector. When KRE drops hard, it means credit stress is hitting the companies your money is invested in directly.",
+          gs_note:"G→S: KRE stable or rising means credit conditions are healthy and banks can lend — a positive backdrop for small/mid cap companies.",
+          sg_note:"S→G: KRE dropping -3% or more in a day signals credit stress. This is an override-level warning when combined with any other trigger. KRE -5%+ alone justifies exit."
+        },
+        {
+          symbol:"IYJ",source:"finnhub",cacheKey:"IYJ",name:"iShares U.S. Industrials ETF",badge:"",
+          threshold:"17.5% of S Fund — confirms economic cycle health",
+          signalFn:priceUp,
+          mechanism:"Industrials are 17.5% of the S Fund. These companies are highly sensitive to economic cycles, tariffs, and manufacturing activity. IYJ strength confirms the economy is growing.",
+          gs_note:"G→S: IYJ rising confirms industrial/manufacturing activity is healthy — a tailwind for 17.5% of your fund.",
+          sg_note:"S→G: IYJ breaking down with ISM PMI below 50 = double confirmation that manufacturing is contracting and industrials will drag the S Fund."
+        },
+        {
+          symbol:"SPY",source:"finnhub",cacheKey:"SPY",name:"S&P 500 ETF (C Fund proxy)",badge:"C FUND",
+          threshold:"Compare: Is S Fund outperforming or underperforming C Fund?",
+          signalFn:priceUp,
+          mechanism:"The C Fund benchmark. Comparing SPY vs DWCPF/IWM tells you whether small caps are leading (risk ON) or lagging (risk OFF). When small caps outperform large caps, it's a healthy risk-on signal.",
+          gs_note:"G→S: IWM/DWCPF outperforming SPY on the day = small caps are leading. This is the ideal entry environment.",
+          sg_note:"S→G: SPY holding while IWM falls = rotation out of small caps into large caps. Capital is getting defensive without leaving equities entirely — a warning."
+        },
       ]
     },
     {
       id:"danger",category:"🔴 Danger Signals",subtitle:"When these rise, S Fund hurts",color:"#ff4466",
       items:[
-        {symbol:"VIX",source:"finnhub",cacheKey:"VIX",name:"CBOE Volatility Index",badge:"",threshold:"Alarm: >20",note:"Fear gauge — 20+ caution, 30+ alarm",signalFn:vixSig},
-        {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"Watch: >4.25%",note:"Rising rates crush small cap margins",signalFn:tnxSig},
-        {symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Year Treasury Yield",badge:"",threshold:"",note:"Fed short-term rate expectations",signalFn:priceDown},
-        {symbol:"DXY",source:"finnhub",cacheKey:"DXY",name:"U.S. Dollar Index",badge:"",threshold:"Watch: >105",note:"Strong dollar = tighter conditions",signalFn:dxySig},
-        {symbol:"XAUUSD",source:"finnhub",cacheKey:"OANDA:XAUUSD",name:"Gold Spot (XAU/USD)",badge:"",threshold:"Warn: >$3,000",note:"Gold surge = fear/flight to safety",signalFn:goldSig},
+        {
+          symbol:"VIX",source:"finnhub",cacheKey:"VIX",name:"CBOE Volatility Index",badge:"PRIMARY SIGNAL",
+          threshold:"<19 = Entry OK · 20–24 = Caution · 25+ = Override Exit",
+          signalFn:vixSig,
+          mechanism:"The fear gauge. Measures expected volatility in the S&P 500 over the next 30 days. VIX and DWCPF move in opposite directions almost always — when fear spikes, small caps get sold first because they are less liquid.",
+          gs_note:"G→S: VIX must be below ~18-19 and compressing (falling). A calm VIX means fear has subsided and buyers are confident enough to take on small-cap risk.",
+          sg_note:"S→G: VIX rising above 20 and holding there is an exit trigger. VIX above 25 is an immediate override — exit the S Fund regardless of any other signal."
+        },
+        {
+          symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"PRIMARY SIGNAL",
+          threshold:"Falling = G→S OK · Rising sticky >4.5% = S→G trigger",
+          signalFn:tnxSig,
+          mechanism:"The single most important macro variable for small caps. Rising rates increase borrowing costs for small/mid cap companies which carry more debt than large caps. Higher rates also make bonds more attractive vs stocks, pulling capital away from equities.",
+          gs_note:"G→S: TNX must be falling or making lower highs. Falling rates reduce borrowing costs for S Fund companies and signal the Fed is easing — both powerful tailwinds.",
+          sg_note:"S→G: TNX rising above 4.5% and staying there removes the rate relief that small caps need. Each 0.25% rate rise is roughly a 2-3% headwind to small-cap valuations."
+        },
+        {
+          symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Year Treasury Yield",badge:"",
+          threshold:"Falling = markets pricing in cuts (bullish) · Rising = hawkish",
+          signalFn:priceDown,
+          mechanism:"The 2-Year yield moves with Fed rate expectations. If the 2-Year is falling, markets are pricing in rate cuts — which is one of the most powerful catalysts for S Fund rallies. Small caps benefit disproportionately from falling short rates.",
+          gs_note:"G→S: 2-Year falling = rate cuts being priced in. Small caps historically rally 15-25% in the 12 months after the first rate cut.",
+          sg_note:"S→G: 2-Year rising after a period of stability means the market is repricing Fed policy hawkish — a headwind that removes the rate cut catalyst."
+        },
+        {
+          symbol:"DXY",source:"finnhub",cacheKey:"DXY",name:"U.S. Dollar Index",badge:"",
+          threshold:"Below 103 = favorable · Above 106 = headwind for small caps",
+          signalFn:dxySig,
+          mechanism:"A strong dollar tightens global financial conditions. Small-cap companies often rely on domestic credit markets that price off dollar strength. A rising DXY also signals risk-off sentiment globally.",
+          gs_note:"G→S: DXY below 103 or falling = financial conditions loosening, supportive of small-cap risk-taking.",
+          sg_note:"S→G: DXY above 106 and rising = tighter financial conditions, usually accompanies other risk-off signals. Not an override alone but accelerates the exit case."
+        },
+        {
+          symbol:"XAUUSD",source:"finnhub",cacheKey:"OANDA:XAUUSD",name:"Gold Spot (XAU/USD)",badge:"",
+          threshold:"Gold surging >+1% in a day = fear signal — check other indicators",
+          signalFn:goldSig,
+          mechanism:"Gold rises when investors fear inflation, geopolitical risk, or currency debasement. A gold surge tells you something is wrong in the macro environment even if stocks haven't reacted yet. It's an early warning system.",
+          gs_note:"G→S: Gold flat or falling = no fear premium being priced in. Safe to take on S Fund risk.",
+          sg_note:"S→G: Gold surging +1% or more in a day while stocks are also falling = flight to safety is happening. This is an accelerant signal — not an override alone but combined with VIX or TNX becomes urgent."
+        },
       ]
     },
     {
       id:"economic",category:"📊 Economic Indicators",subtitle:"Live from FRED — auto-updates on release day",color:"#ffaa00",
       items:[
-        {symbol:"PCE",    source:"fred",fredId:"PCEPILFE",        fallbackId:"PCEPILFE",        name:"Core PCE Inflation",         badge:"FRED LIVE",threshold:"Target: <2.5%",  note:"Fed's #1 inflation gauge",              fredSigFn:pceSig, fredFmt:v=>v.toFixed(2)+"%"},
-        {symbol:"CPI",    source:"fred",fredId:"CPIAUCSL_YOY",    fallbackId:"CPIAUCSL_YOY",    name:"CPI Year-over-Year",         badge:"FRED LIVE",threshold:"Watch: <2.5%",   note:"Headline consumer inflation (YoY calc)",fredSigFn:cpiSig, fredFmt:v=>v.toFixed(1)+"%", fredYoY:true, fredRealId:"CPIAUCSL"},
-        {symbol:"ISM",    source:"fred",fredId:"NAPM",            fallbackId:"NAPM",            name:"ISM Manufacturing PMI",      badge:"FRED LIVE",threshold:"Need: >50",      note:"Below 50 = contraction",                fredSigFn:ismSig, fredFmt:v=>v.toFixed(1)},
-        {symbol:"GDP",    source:"fred",fredId:"A191RL1Q225SBEA", fallbackId:"A191RL1Q225SBEA", name:"Real GDP Growth Rate",       badge:"FRED LIVE",threshold:"Healthy: >2.5%", note:"Quarterly annualized % change",          fredSigFn:gdpSig, fredFmt:v=>v.toFixed(1)+"%"},
-        {symbol:"JOBLESS",source:"fred",fredId:"ICSA",            fallbackId:"ICSA",            name:"Initial Jobless Claims",     badge:"FRED LIVE",threshold:"Safe: <220K",    note:"Released every Thursday 8:30am ET",      fredSigFn:jobSig, fredFmt:v=>Math.round(v/1000)+"K weekly"},
-        {symbol:"NFCI",   source:"fred",fredId:"NFCI",            fallbackId:"NFCI",            name:"Nat'l Financial Cond. Index",badge:"FRED LIVE",threshold:"Healthy: <0",    note:"Negative = loose/healthy conditions",    fredSigFn:nfciSig,fredFmt:v=>v.toFixed(2)},
+        {
+          symbol:"PCE",source:"fred",fredId:"PCEPILFE",name:"Core PCE Inflation",badge:"FRED LIVE",
+          threshold:"<2.5% = rate cuts possible · >3.0% = override exit trigger",
+          fredSigFn:pceSig,fredFmt:v=>v.toFixed(2)+"%",
+          mechanism:"The Fed's preferred inflation measure. Everything depends on this number. When PCE is above 2.5% and rising, the Fed cannot cut rates — and rate cuts are the single biggest catalyst for S Fund rallies. The S Fund needs falling rates to thrive.",
+          gs_note:"G→S: PCE trending toward 2.5% opens the door to rate cuts which supercharge small-cap returns. A falling PCE print is one of the most powerful G→S catalysts.",
+          sg_note:"S→G: PCE re-accelerating above 3.0% is an immediate override. Hot inflation kills the rate cut narrative which is the primary support for small-cap valuations."
+        },
+        {
+          symbol:"CPI",source:"fred",fredId:"CPIAUCSL_YOY",name:"CPI Year-over-Year",badge:"FRED LIVE",
+          threshold:"<2.5% = supportive · >3.0% = exit accelerant",
+          fredSigFn:cpiSig,fredFmt:v=>v.toFixed(1)+"%",fredYoY:true,fredRealId:"CPIAUCSL",
+          mechanism:"Headline inflation. Released monthly by the Bureau of Labor Statistics. While PCE is the Fed's preferred gauge, CPI moves markets on release day because it's more widely watched. A hot CPI print can spike VIX and crush small caps in a single session.",
+          gs_note:"G→S: CPI cooling toward 2.5% confirms the inflation fight is winning — supports the Fed pivot narrative that small caps need.",
+          sg_note:"S→G: A hot CPI surprise on release day can act as a same-day override. If CPI prints hot and VIX spikes on the same morning, that is a noon-deadline exit signal."
+        },
+        {
+          symbol:"ISM",source:"fred",fredId:"NAPM",name:"ISM Manufacturing PMI",badge:"FRED LIVE",
+          threshold:"Above 50 = expansion · Below 50 = contraction (headwind for Industrials)",
+          fredSigFn:ismSig,fredFmt:v=>v.toFixed(1),
+          mechanism:"Released the first business day of every month. Measures manufacturing activity. Since Industrials are 17.5% of the S Fund, a contracting ISM (below 50) is a direct headwind to a large portion of your fund.",
+          gs_note:"G→S: ISM above 52 = manufacturing expanding. Industrials (17.5% of S Fund) have a tailwind. Supports entry.",
+          sg_note:"S→G: ISM below 48 and falling confirms the industrial sector is contracting. Combined with other signals, this validates an S→G move."
+        },
+        {
+          symbol:"GDP",source:"fred",fredId:"A191RL1Q225SBEA",name:"Real GDP Growth Rate",badge:"FRED LIVE",
+          threshold:"Above 2.5% = healthy · Below 1.5% = recession risk = exit watch",
+          fredSigFn:gdpSig,fredFmt:v=>v.toFixed(1)+"%",
+          mechanism:"Quarterly annualized growth rate. Small/mid cap companies are more economically sensitive than large caps — they have less pricing power and less cushion during slowdowns. GDP below 2% is a warning; below 1% is a recession signal.",
+          gs_note:"G→S: GDP above 2.5% shows the economy is growing fast enough to support small-cap earnings growth. Strong economic backdrop reduces default risk in the fund.",
+          sg_note:"S→G: GDP slowing below 1.5% raises recession risk — small caps typically fall 30-50% in recessions versus 20-30% for large caps. This is a slow-moving but serious signal."
+        },
+        {
+          symbol:"JOBLESS",source:"fred",fredId:"ICSA",name:"Initial Jobless Claims",badge:"FRED LIVE",
+          threshold:"Below 220K = healthy labor · Above 250K = labor deteriorating",
+          fredSigFn:jobSig,fredFmt:v=>Math.round(v/1000)+"K weekly",
+          mechanism:"Released every Thursday at 8:30am ET. Measures weekly unemployment filings. Small/mid cap companies are the largest employers in the U.S. — a spike in jobless claims often hits these companies first. Rising claims can be an early recession warning.",
+          gs_note:"G→S: Claims below 220K = labor market healthy, consumer spending intact, small-cap revenues supported.",
+          sg_note:"S→G: A sudden spike above 250K over multiple weeks signals layoffs are accelerating — small/mid caps will feel this before large caps do."
+        },
+        {
+          symbol:"NFCI",source:"fred",fredId:"NFCI",name:"Nat'l Financial Conditions Index",badge:"FRED LIVE",
+          threshold:"Below 0 = loose/healthy · Above 0 = tightening · Above 0.5 = stress",
+          fredSigFn:nfciSig,fredFmt:v=>v.toFixed(2),
+          mechanism:"Measures tightness in financial markets — credit availability, risk spreads, leverage. Small/mid cap companies depend heavily on credit markets. When NFCI rises (tightening), borrowing becomes harder and more expensive for exactly the companies in the S Fund.",
+          gs_note:"G→S: NFCI negative = financial conditions are loose, credit is flowing freely, small caps can borrow and grow. Supportive entry environment.",
+          sg_note:"S→G: NFCI turning positive and rising = credit tightening. This often precedes stock market stress by weeks — it's an early warning to watch closely."
+        },
       ]
     },
     {
       id:"fed",category:"🏦 Fed & Policy",subtitle:"Forward-looking rate signals",color:"#44aaff",
       items:[
-        {symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Yr Treasury (Fed expectations)",badge:"",threshold:"Falling = cuts near",note:"Best real-time Fed rate expectation signal",signalFn:priceDown},
-        {symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"",threshold:"",note:"Long-end growth/inflation expectations",signalFn:priceDown},
-        {symbol:"US30Y",source:"finnhub",cacheKey:"US30Y",name:"30-Year Treasury Yield",badge:"",threshold:"",note:"Long-end inflation expectations",signalFn:priceDown},
-        {symbol:"2s10s",source:"spread",name:"2s10s Yield Curve Spread",badge:"LIVE CALC",threshold:"Healthy: positive",note:"Auto-calculated: US10Y minus US02Y every refresh",spreadSigFn:spreadSig},
-        {symbol:"FOMC", source:"fomc",  name:"Next FOMC Meeting",badge:"AUTO",threshold:"",note:"Dovish = good | Hawkish = bad"},
+        {
+          symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Yr Treasury (Fed expectations)",badge:"PRIMARY SIGNAL",
+          threshold:"Falling = rate cuts priced in (bullish) · Rising = hawkish repricing",
+          signalFn:priceDown,
+          mechanism:"The most real-time indicator of what the market thinks the Fed will do. Falls when rate cuts are expected, rises when hikes or holds are expected. Small caps are the most rate-sensitive asset class — a falling 2-Year is like fuel for the S Fund.",
+          gs_note:"G→S: 2-Year falling and making lower highs = the market is pricing in cuts. Historically one of the strongest predictors of a small-cap rally.",
+          sg_note:"S→G: 2-Year reversing higher = the rate cut narrative is breaking down. When markets reprice Fed hawkishness, small caps sell off faster than large caps."
+        },
+        {
+          symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"PRIMARY SIGNAL",
+          threshold:"Falling = growth optimism · Rising fast = tightening headwind",
+          signalFn:priceDown,
+          mechanism:"The long-end rate. Reflects expectations for long-term growth and inflation. When the 10-Year rises due to inflation fears (not growth), it's bad for stocks — especially small caps with high debt loads.",
+          gs_note:"G→S: 10-Year falling or stable = growth-positive, rate-neutral backdrop for small caps.",
+          sg_note:"S→G: 10-Year rising sharply while stocks fall = stagflation signal. The worst environment for the S Fund — high rates AND slowing growth."
+        },
+        {
+          symbol:"US30Y",source:"finnhub",cacheKey:"US30Y",name:"30-Year Treasury Yield",badge:"",
+          threshold:"Rising 30Y = long-term inflation concerns — watch alongside 10Y",
+          signalFn:priceDown,
+          mechanism:"The longest maturity Treasury. Reflects very long-term inflation expectations. When the 30-Year rises while the 10-Year also rises, it means the bond market is worried about structural inflation — a multi-year headwind for the S Fund.",
+          gs_note:"G→S: 30-Year stable or falling = bond market not worried about long-term inflation. Fed has room to cut.",
+          sg_note:"S→G: 30-Year rising alongside 10-Year = bond market is telling you inflation is not under control. This environment historically produces the worst S Fund returns."
+        },
+        {
+          symbol:"2s10s",source:"spread",name:"2s10s Yield Curve Spread",badge:"LIVE CALC",
+          threshold:"Positive & steepening = healthy · Negative (inverted) = recession warning",
+          spreadSigFn:spreadSig,
+          mechanism:"The difference between the 10-Year and 2-Year Treasury yield. A positive spread (10Y > 2Y) means normal growth expectations. An inverted curve (2Y > 10Y) has preceded every U.S. recession in the past 50 years. Regional banks (18% of S Fund) suffer when the curve is flat or inverted.",
+          gs_note:"G→S: Curve steepening (spread widening positively) = banks can borrow short and lend long profitably. Positive for KRE and the 18% of S Fund in Financials.",
+          sg_note:"S→G: Curve inverting or flattening to near zero = credit transmission is breaking down. Regional banks (18% of your fund) lose their profit engine."
+        },
+        {
+          symbol:"FOMC",source:"fomc",name:"Next FOMC Meeting",badge:"AUTO",
+          threshold:"Dovish outcome = S Fund rally · Hawkish = S Fund sells off",
+          mechanism:"The Federal Open Market Committee meets ~8 times per year to set rates. Each meeting is a potential catalyst. Markets often rally into dovish meetings and sell off into hawkish ones. The week of an FOMC meeting can be volatile — be positioned before the decision, not after.",
+          gs_note:"G→S: Consider entering 3-5 days before a meeting if all primaries are green — you want to be in before a potential dovish surprise.",
+          sg_note:"S→G: If the Fed signals rates will stay higher for longer (hawkish), the rate cut narrative dies — consider moving to G in the days following a hawkish meeting."
+        },
       ]
     }
   ];
@@ -274,7 +717,6 @@
       return{c:d.c,d:d.d,dp:d.dp,pc:d.pc};
     }catch{return null;}
   }
-
   async function fetchYahoo(sym){
     try{
       const r=await fetch(`${YH_BASE}${encodeURIComponent(sym)}?interval=1d&range=1d`);
@@ -288,51 +730,33 @@
       return{c,d,dp,pc};
     }catch{return null;}
   }
-
-  // FRED fetch — sort desc, limit 2 = gets the most recent observation first
-  async function fetchFREDseries(seriesId, limit=2){
-    const url=`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=${limit}&observation_end=9999-01-01`;
-    // Try proxy 1
-    try{
-      const r=await fetch(PROXY1+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
-      if(r.ok){const d=await r.json();if(d?.observations)return d;}
-    }catch{}
-    // Try proxy 2
-    try{
-      const r=await fetch(PROXY2+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
-      if(r.ok){const txt=await r.text();const d=JSON.parse(txt);if(d?.observations)return d;}
-    }catch{}
-    // Direct attempt
-    try{
-      const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
-      if(r.ok){const d=await r.json();if(d?.observations)return d;}
-    }catch{}
+  async function fetchFREDseries(seriesId,limit=2){
+    const url=`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=${limit}`;
+    for(const proxy of[PROXY1,PROXY2,""]) {
+      try{
+        const fullUrl=proxy?proxy+encodeURIComponent(url):url;
+        const r=await fetch(fullUrl,{signal:AbortSignal.timeout(8000)});
+        if(r.ok){const d=await r.json();if(d?.observations)return d;}
+      }catch{}
+    }
     return null;
   }
-
   async function fetchFRED(seriesId){
     const data=await fetchFREDseries(seriesId,2);
     if(!data)return null;
     const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
     if(!obs.length)return null;
-    // desc order so first is latest
     return{value:parseFloat(obs[0].value),date:obs[0].date,isFallback:false};
   }
-
   async function fetchCPIyoy(){
-    // Get last 14 months descending, calculate YoY from index values
     const data=await fetchFREDseries("CPIAUCSL",14);
     if(!data)return null;
     const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
     if(obs.length<13)return null;
-    // desc order: obs[0]=latest, obs[12]=12 months ago
-    const latest=parseFloat(obs[0].value);
-    const yearAgo=parseFloat(obs[12].value);
-    const yoy=((latest-yearAgo)/yearAgo)*100;
-    return{value:yoy,date:obs[0].date,isFallback:false};
+    const latest=parseFloat(obs[0].value),yearAgo=parseFloat(obs[12].value);
+    return{value:((latest-yearAgo)/yearAgo)*100,date:obs[0].date,isFallback:false};
   }
 
-  // ── Seed fallbacks immediately ────────────────────────────────────────────
   function seedFallbacks(){
     groups.flatMap(g=>g.items.filter(i=>i.source==="fred")).forEach(item=>{
       if(!fredCache[item.fredId]&&FRED_FALLBACKS[item.fredId]){
@@ -347,11 +771,8 @@
     setStatus("loading","Fetching live market data...");
     document.getElementById("refresh-btn").disabled=true;
     updateMarketStatus();
-
-    // Seed fallbacks first so page shows data immediately
     seedFallbacks();
 
-    // Price jobs
     const seen=new Set(),priceJobs=[];
     [...groups.flatMap(g=>g.items),...alertDefs].forEach(item=>{
       if(item.source==="finnhub"||item.source==="yahoo"){
@@ -366,8 +787,7 @@
       cache[key]=q;
       if(q&&prev!==null&&q.c!==prev){
         document.querySelectorAll(`[data-cachekey="${key}"]`).forEach(row=>{
-          row.classList.remove("flash-up","flash-dn");
-          void row.offsetWidth;
+          row.classList.remove("flash-up","flash-dn");void row.offsetWidth;
           row.classList.add(q.c>prev?"flash-up":"flash-dn");
         });
       }
@@ -377,21 +797,16 @@
       if(i<priceJobs.length-1)await sleep(150);
     }
 
-    // FRED jobs — parallel, replace fallbacks with live data if successful
     const fredItems=groups.flatMap(g=>g.items.filter(i=>i.source==="fred"));
     await Promise.all(fredItems.map(async item=>{
       const result=item.fredYoY?await fetchCPIyoy():await fetchFRED(item.fredId);
-      if(result){
-        fredCache[item.fredId]=result;
-        updateRow(item);
-      }
-      // If result is null, fallback stays displayed — no change needed
+      if(result){fredCache[item.fredId]=result;updateRow(item);}
     }));
 
     updateSpread();
     updateFOMC();
+    evaluateDecision();
     updateAlertBar();
-    updateOverallSignal();
     setStatus("live","Live — auto-refreshes every 60s");
     document.getElementById("last-update").textContent=
       "Updated: "+new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
@@ -401,28 +816,19 @@
 
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-  // ── Computed rows ─────────────────────────────────────────────────────────
   function updateSpread(){
     const q10=cache["US10Y"],q02=cache["US02Y"];
-    const rid="row-2s10s";
-    const prEl=document.getElementById("price-"+rid);
-    const sgEl=document.getElementById("signal-"+rid);
+    const rid="row-2s10s",prEl=document.getElementById("price-"+rid),sgEl=document.getElementById("signal-"+rid);
     if(!prEl||!sgEl)return;
-    if(!q10||!q02){
-      prEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Awaiting yield data</span>`;
-      sgEl.innerHTML=`<span class="signal-badge sig-loading">CALCULATING</span>`;
-      return;
-    }
-    const spread=q10.c-q02.c;
-    const cls=spread>=0?"up-price":"dn-price";
+    if(!q10||!q02){prEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Awaiting yield data</span>`;sgEl.innerHTML=`<span class="signal-badge sig-loading">CALCULATING</span>`;return;}
+    const spread=q10.c-q02.c,cls=spread>=0?"up-price":"dn-price";
     prEl.innerHTML=`<div class="price-val">${spread.toFixed(3)}%</div><div class="price-chg ${cls}">10Y ${q10.c.toFixed(3)}% − 2Y ${q02.c.toFixed(3)}%</div>`;
-    sgEl.innerHTML=`<span class="signal-badge ${spreadSig(spread).cls}">${spreadSig(spread).label}</span>`;
+    const sig=spreadSig(spread);
+    sgEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
   }
 
   function updateFOMC(){
-    const rid="row-FOMC";
-    const prEl=document.getElementById("price-"+rid);
-    const sgEl=document.getElementById("signal-"+rid);
+    const rid="row-FOMC",prEl=document.getElementById("price-"+rid),sgEl=document.getElementById("signal-"+rid);
     if(!prEl||!sgEl)return;
     const next=getNextFOMC();
     const days=next.date?Math.ceil((next.date-new Date())/864e5):"";
@@ -430,7 +836,6 @@
     sgEl.innerHTML=`<span class="signal-badge sig-neutral">📅 UPCOMING</span>`;
   }
 
-  // ── Row update ────────────────────────────────────────────────────────────
   const safeId=s=>s.replace(/[^a-zA-Z0-9]/g,"_");
 
   function updateRow(item){
@@ -438,46 +843,28 @@
     const priceEl=document.getElementById("price-"+rid);
     const signalEl=document.getElementById("signal-"+rid);
     if(!priceEl||!signalEl)return;
-
     if(item.source==="fred"){
       const cached=fredCache[item.fredId];
-      if(!cached){
-        priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Loading FRED...</span>`;
-        signalEl.innerHTML=`<span class="signal-badge sig-loading">LOADING...</span>`;
-        return;
-      }
-      const v=cached.value;
-      const txt=item.fredFmt?item.fredFmt(v):v.toFixed(2);
+      if(!cached){priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Loading FRED...</span>`;signalEl.innerHTML=`<span class="signal-badge sig-loading">LOADING...</span>`;return;}
+      const v=cached.value,txt=item.fredFmt?item.fredFmt(v):v.toFixed(2);
       const fbTag=cached.isFallback?`<span class="fallback-tag">LAST KNOWN</span>`:"";
       priceEl.innerHTML=`<div class="price-val">${txt}${fbTag}</div><div class="price-sub">as of ${cached.date}</div>`;
-      const sig=item.fredSigFn(v);
-      signalEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
+      signalEl.innerHTML=`<span class="signal-badge ${item.fredSigFn(v).cls}">${item.fredSigFn(v).label}</span>`;
       return;
     }
     if(item.source==="spread"||item.source==="fomc")return;
-
     const q=cache[item.cacheKey];
-    if(!q){
-      priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Mkt closed / N/A</span>`;
-      signalEl.innerHTML=`<span class="signal-badge sig-loading">— N/A</span>`;
-      return;
-    }
-    const chgClass=q.dp>=0?"up-price":"dn-price";
-    const arrow=q.dp>=0?"▲":"▼";
-    const priceTxt=fmtPrice(q.c,item.cacheKey)||q.c.toFixed(2);
-    const chgTxt=fmtChg(q.d,q.c,item.cacheKey);
+    if(!q){priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Mkt closed / N/A</span>`;signalEl.innerHTML=`<span class="signal-badge sig-loading">— N/A</span>`;return;}
+    const chgClass=q.dp>=0?"up-price":"dn-price",arrow=q.dp>=0?"▲":"▼";
+    const priceTxt=fmtPrice(q.c,item.cacheKey)||q.c.toFixed(2),chgTxt=fmtChg(q.d,q.c,item.cacheKey);
     priceEl.innerHTML=`<div class="price-val">${priceTxt}</div><div class="price-chg ${chgClass}">${arrow} ${chgTxt} (${fmtSign(q.dp)}%)</div>`;
-    const sig=item.signalFn(q);
-    signalEl.innerHTML=`<span class="signal-badge ${sig.cls}">${sig.label}</span>`;
+    signalEl.innerHTML=`<span class="signal-badge ${item.signalFn(q).cls}">${item.signalFn(q).label}</span>`;
   }
 
-  // ── Alert bar ─────────────────────────────────────────────────────────────
   function buildAlertBar(){
-    const bar=document.getElementById("alert-bar");
-    bar.innerHTML="";
+    const bar=document.getElementById("alert-bar");bar.innerHTML="";
     alertDefs.forEach(a=>{
-      const id="pill-"+safeId(a.label);
-      const pill=document.createElement("div");
+      const id="pill-"+safeId(a.label),pill=document.createElement("div");
       pill.className="alert-pill";pill.id=id;
       pill.innerHTML=`<div class="ap-sym">${a.label}</div><div class="ap-level" id="${id}-price">—</div><div class="ap-sig" id="${id}-sig">—</div>`;
       bar.appendChild(pill);
@@ -487,15 +874,12 @@
   function updateAlertBar(){
     alertDefs.forEach(a=>{
       const id="pill-"+safeId(a.label);
-      const prEl=document.getElementById(id+"-price");
-      const sgEl=document.getElementById(id+"-sig");
-      const pill=document.getElementById(id);
+      const prEl=document.getElementById(id+"-price"),sgEl=document.getElementById(id+"-sig"),pill=document.getElementById(id);
       const q=cache[a.cacheKey];
       if(!prEl||!sgEl)return;
       if(!q){prEl.textContent="N/A";sgEl.textContent="—";return;}
       const chgClass=q.dp>=0?"up-price":"dn-price";
-      const priceTxt=fmtPrice(q.c,a.cacheKey)||q.c.toFixed(2);
-      prEl.innerHTML=`<span class="${chgClass}">${priceTxt} (${fmtSign(q.dp)}%)</span>`;
+      prEl.innerHTML=`<span class="${chgClass}">${fmtPrice(q.c,a.cacheKey)||q.c.toFixed(2)} (${fmtSign(q.dp)}%)</span>`;
       const sig=a.signalFn(q);
       sgEl.innerHTML=`<span style="color:${sigColor(sig.cls)};font-size:9px;">${sig.label}</span>`;
       if(pill)pill.style.borderColor=sigColor(sig.cls)+"66";
@@ -503,27 +887,6 @@
   }
 
   const sigColor=c=>({"sig-good":"#00cc66","sig-bad":"#ff4466","sig-caution":"#ffaa00"}[c]||"#3b7ec8");
-
-  function updateOverallSignal(){
-    let bad=0,caution=0,good=0;
-    groups.forEach(g=>g.items.forEach(item=>{
-      let sig=null;
-      if((item.source==="finnhub"||item.source==="yahoo")&&item.signalFn){const q=cache[item.cacheKey];if(q)sig=item.signalFn(q);}
-      else if(item.source==="fred"&&item.fredSigFn){const c=fredCache[item.fredId];if(c)sig=item.fredSigFn(c.value);}
-      else if(item.source==="spread"){const q10=cache["US10Y"],q02=cache["US02Y"];if(q10&&q02)sig=spreadSig(q10.c-q02.c);}
-      if(!sig)return;
-      if(sig.cls==="sig-bad")bad++;
-      else if(sig.cls==="sig-caution")caution++;
-      else good++;
-    }));
-    const total=bad+caution+good;
-    const valEl=document.getElementById("overall-val"),noteEl=document.getElementById("overall-note");
-    if(bad>=6){valEl.textContent="🚨 HIGH RISK";valEl.style.color="#ff4466";noteEl.textContent=`${bad} of ${total} signals negative`;}
-    else if(bad>=3){valEl.textContent="⚠ NEAR-TERM CAUTION";valEl.style.color="#ff8844";noteEl.textContent=`${bad} of ${total} signals negative`;}
-    else if(caution>=4){valEl.textContent="⚠ MIXED SIGNALS";valEl.style.color="#ffaa00";noteEl.textContent=`${caution} of ${total} cautionary`;}
-    else if(good>=5){valEl.textContent="✅ CONSTRUCTIVE";valEl.style.color="#00cc66";noteEl.textContent=`${good} of ${total} signals positive`;}
-    else{valEl.textContent="— MONITORING";valEl.style.color="#3b7ec8";noteEl.textContent="Assessing live data...";}
-  }
 
   function setStatus(state,msg){document.getElementById("live-dot").className=state;document.getElementById("status-text").textContent=msg;}
 
@@ -539,24 +902,28 @@
   }
 
   function renderGroups(){
-    const container=document.getElementById("watchlist-content");
-    container.innerHTML="";
+    const container=document.getElementById("watchlist-content");container.innerHTML="";
     const visible=activeFilter==="all"?groups:groups.filter(g=>g.id===activeFilter);
     visible.forEach(g=>{
       const rows=g.items.map((item,i)=>{
         const rid="row-"+safeId(item.symbol),ckey=item.cacheKey||"";
         const badge=item.badge?`<span class="star-badge">${item.badge}</span>`:"";
+        const notesHtml=`
+          <div class="note-mechanism">${item.mechanism}</div>
+          <div class="note-triggers">
+            <div class="note-gs"><span class="note-arrow">⬆G→S:</span>${item.gs_note}</div>
+            <div class="note-sg"><span class="note-arrow">⬇S→G:</span>${item.sg_note}</div>
+          </div>`;
         return`<tr id="${rid}" data-cachekey="${ckey}" class="${i%2===0?"even":"odd"}">
           <td class="td-symbol" style="color:${g.color};border-left:3px solid ${g.color}55;">${item.symbol}</td>
-          <td class="td-name">${item.name}${badge}</td>
+          <td class="td-name">${item.name}${badge}<br><span style="font-size:9px;color:#3b6090;">${item.threshold}</span></td>
           <td class="price-cell" id="price-${rid}"><span style="color:#3a5a7a;font-size:10px;">Loading...</span></td>
-          <td id="signal-${rid}"><span class="signal-badge sig-loading">LOADING...</span></td>
-          <td class="td-note">${item.threshold?`<span class="threshold">${item.threshold}</span>`:""}${item.note}</td>
+          <td class="signal-col" id="signal-${rid}"><span class="signal-badge sig-loading">LOADING...</span></td>
+          <td class="notes-col">${notesHtml}</td>
         </tr>`;
       }).join("");
-      container.innerHTML+=`<div class="group"><div class="group-header" style="border-bottom:1px solid ${g.color}44;"><div class="group-title" style="color:${g.color};">${g.category}</div><div class="group-sub">— ${g.subtitle.toUpperCase()}</div></div><div class="table-wrap"><table><thead><tr><th>SYMBOL</th><th>NAME</th><th>LIVE PRICE / CHANGE</th><th>SIGNAL</th><th>THRESHOLD / NOTE</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+      container.innerHTML+=`<div class="group"><div class="group-header" style="border-bottom:1px solid ${g.color}44;"><div class="group-title" style="color:${g.color};">${g.category}</div><div class="group-sub">— ${g.subtitle.toUpperCase()}</div></div><div class="table-wrap"><table><thead><tr><th>SYMBOL</th><th>NAME / THRESHOLD</th><th>LIVE PRICE</th><th>SIGNAL</th><th>HOW IT IMPACTS YOUR MOVE</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     });
-    // Render cached/fallback data immediately
     groups.forEach(g=>g.items.forEach(item=>{
       if(item.source==="fred"){if(fredCache[item.fredId])updateRow(item);}
       else if(item.source==="spread")updateSpread();
@@ -566,8 +933,7 @@
   }
 
   function renderTabs(){
-    const bar=document.getElementById("filter-bar");
-    bar.innerHTML="";
+    const bar=document.getElementById("filter-bar");bar.innerHTML="";
     const allBtn=document.createElement("button");
     allBtn.className="tab-btn"+(activeFilter==="all"?" active":"");
     allBtn.textContent="ALL SIGNALS";
@@ -586,9 +952,9 @@
 
   const sources=[
     {name:"Yahoo Finance",url:"finance.yahoo.com",note:"^DWCPF — S Fund exact benchmark"},
-    {name:"Finnhub.io",url:"finnhub.io",note:"RUT, IWM, MDY, KRE, IYJ, SPY, VIX, US10Y, US02Y, US30Y, DXY, Gold"},
-    {name:"FRED API",url:"fred.stlouisfed.org",note:"PCE, CPI YoY, ISM, GDP, Jobless Claims, NFCI — live on release day, fallback values shown otherwise"},
-    {name:"2s10s Spread",url:"Calculated live",note:"US10Y minus US02Y — computed every refresh"},
+    {name:"Finnhub.io",url:"finnhub.io",note:"All ETF & market data"},
+    {name:"FRED API",url:"fred.stlouisfed.org",note:"Economic indicators — fallback values shown when API unavailable"},
+    {name:"2s10s Spread",url:"Calculated live",note:"US10Y minus US02Y"},
     {name:"FOMC Calendar",url:"federalreserve.gov",note:"Auto-advancing with days countdown"},
   ];
 
