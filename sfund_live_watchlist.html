@@ -241,12 +241,7 @@
 </div>
 
 <script>
-  const FH_KEY   = "d6i7bshr01ql9cif7kkgd6i7bshr01ql9cif7kl0";
-  const FRED_KEY = "7a6cf55858969b817e221d06da1ee3ce";
-  const FH_BASE  = "https://finnhub.io/api/v1";
-  const YH_BASE  = "https://query1.finance.yahoo.com/v8/finance/chart/";
-  const PROXY1   = "https://corsproxy.io/?";
-  const PROXY2   = "https://api.allorigins.win/raw?url=";
+  const PROXY_URL = "/.netlify/functions/proxy";
 
   // ── FOMC ──────────────────────────────────────────────────────────────────
   const FOMC_DATES=[
@@ -708,56 +703,24 @@
   let activeFilter="all",countdownSec=60,countdownTimer=null;
 
   // ── Fetch helpers ─────────────────────────────────────────────────────────
-  async function fetchFinnhub(sym){
+  // ── Single proxy fetch ───────────────────────────────────────────────────
+  async function fetchAllFromProxy(){
     try{
-      const r=await fetch(`${FH_BASE}/quote?symbol=${encodeURIComponent(sym)}&token=${FH_KEY}`);
+      const r=await fetch(PROXY_URL,{signal:AbortSignal.timeout(15000)});
       if(!r.ok)return null;
-      const d=await r.json();
-      if(!d||(d.c===0&&d.pc===0))return null;
-      return{c:d.c,d:d.d,dp:d.dp,pc:d.pc};
-    }catch{return null;}
-  }
-  async function fetchYahoo(sym){
-    try{
-      const r=await fetch(`${YH_BASE}${encodeURIComponent(sym)}?interval=1d&range=1d`);
-      if(!r.ok)return null;
-      const data=await r.json();
-      const meta=data?.chart?.result?.[0]?.meta;
-      if(!meta)return null;
-      const c=meta.regularMarketPrice,pc=meta.chartPreviousClose||meta.previousClose;
-      if(!c)return null;
-      const d=c-pc,dp=pc?(d/pc)*100:0;
-      return{c,d,dp,pc};
-    }catch{return null;}
-  }
-  async function fetchFREDseries(seriesId,limit=2){
-    const url=`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=${limit}`;
-    for(const proxy of[PROXY1,PROXY2,""]) {
-      try{
-        const fullUrl=proxy?proxy+encodeURIComponent(url):url;
-        const r=await fetch(fullUrl,{signal:AbortSignal.timeout(8000)});
-        if(r.ok){const d=await r.json();if(d?.observations)return d;}
-      }catch{}
-    }
-    return null;
-  }
-  async function fetchFRED(seriesId){
-    const data=await fetchFREDseries(seriesId,2);
-    if(!data)return null;
-    const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
-    if(!obs.length)return null;
-    return{value:parseFloat(obs[0].value),date:obs[0].date,isFallback:false};
-  }
-  async function fetchCPIyoy(){
-    const data=await fetchFREDseries("CPIAUCSL",14);
-    if(!data)return null;
-    const obs=data.observations.filter(o=>o.value!=="."&&!isNaN(parseFloat(o.value)));
-    if(obs.length<13)return null;
-    const latest=parseFloat(obs[0].value),yearAgo=parseFloat(obs[12].value);
-    return{value:((latest-yearAgo)/yearAgo)*100,date:obs[0].date,isFallback:false};
+      return await r.json();
+    }catch(e){console.error("Proxy error:",e);return null;}
   }
 
   function seedFallbacks(){
+    const FRED_FALLBACKS={
+      "PCEPILFE":        {value:2.84,  date:"2026-01-01",isFallback:true},
+      "CPIAUCSL_YOY":    {value:2.4,   date:"2026-01-01",isFallback:true},
+      "NAPM":            {value:50.9,  date:"2026-02-01",isFallback:true},
+      "A191RL1Q225SBEA": {value:2.3,   date:"2025-10-01",isFallback:true},
+      "ICSA":            {value:216000,date:"2026-02-22",isFallback:true},
+      "NFCI":            {value:-0.28, date:"2026-02-20",isFallback:true},
+    };
     groups.flatMap(g=>g.items.filter(i=>i.source==="fred")).forEach(item=>{
       if(!fredCache[item.fredId]&&FRED_FALLBACKS[item.fredId]){
         fredCache[item.fredId]=FRED_FALLBACKS[item.fredId];
@@ -773,35 +736,31 @@
     updateMarketStatus();
     seedFallbacks();
 
-    const seen=new Set(),priceJobs=[];
-    [...groups.flatMap(g=>g.items),...alertDefs].forEach(item=>{
-      if(item.source==="finnhub"||item.source==="yahoo"){
-        const k=item.cacheKey;
-        if(k&&!seen.has(k)){seen.add(k);priceJobs.push({key:k,source:item.source});}
-      }
-    });
-    for(let i=0;i<priceJobs.length;i++){
-      const{key,source}=priceJobs[i];
-      const prev=cache[key]?.c??null;
-      const q=source==="yahoo"?await fetchYahoo(key):await fetchFinnhub(key);
-      cache[key]=q;
-      if(q&&prev!==null&&q.c!==prev){
-        document.querySelectorAll(`[data-cachekey="${key}"]`).forEach(row=>{
-          row.classList.remove("flash-up","flash-dn");void row.offsetWidth;
-          row.classList.add(q.c>prev?"flash-up":"flash-dn");
+    const data=await fetchAllFromProxy();
+
+    if(data&&data.prices){
+      // Load price cache
+      Object.entries(data.prices).forEach(([key,val])=>{
+        const prev=cache[key]?.c??null;
+        cache[key]=val;
+        if(val&&prev!==null&&val.c!==prev){
+          document.querySelectorAll(`[data-cachekey="${key}"]`).forEach(row=>{
+            row.classList.remove("flash-up","flash-dn");void row.offsetWidth;
+            row.classList.add(val.c>prev?"flash-up":"flash-dn");
+          });
+        }
+      });
+      // Load FRED cache
+      if(data.fred){
+        Object.entries(data.fred).forEach(([key,val])=>{
+          if(val)fredCache[key]={...val,isFallback:false};
         });
       }
-      groups.forEach(g=>g.items.forEach(item=>{
-        if((item.source==="finnhub"||item.source==="yahoo")&&item.cacheKey===key)updateRow(item);
-      }));
-      if(i<priceJobs.length-1)await sleep(150);
+      // Update all rows
+      groups.forEach(g=>g.items.forEach(item=>updateRow(item)));
+    } else {
+      setStatus("error","Proxy error — showing last known data");
     }
-
-    const fredItems=groups.flatMap(g=>g.items.filter(i=>i.source==="fred"));
-    await Promise.all(fredItems.map(async item=>{
-      const result=item.fredYoY?await fetchCPIyoy():await fetchFRED(item.fredId);
-      if(result){fredCache[item.fredId]=result;updateRow(item);}
-    }));
 
     updateSpread();
     updateFOMC();
@@ -813,6 +772,8 @@
     document.getElementById("refresh-btn").disabled=false;
     startCountdown();
   }
+
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
