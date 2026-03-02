@@ -65,7 +65,7 @@ exports.handler = async (event) => {
     // All price data via Yahoo Finance — works reliably from server-side
     const yahooSymbols = [
       "^DWCPF", "^RUT", "IWM", "MDY", "KRE", "IYJ", "SPY",
-      "^VIX", "^TNX", "^IRX", "^TYX", "DX-Y.NYB", "GC=F"
+      "^VIX", "^TNX", "^IRX", "^TYX", "DX-Y.NYB", "^FVX", "GC=F"
     ];
 
     const priceResults = {};
@@ -85,9 +85,9 @@ exports.handler = async (event) => {
       "SPY":          priceResults["SPY"],
       "VIX":          priceResults["^VIX"],
       "US10Y":        priceResults["^TNX"],
-      "US02Y":        priceResults["^IRX"],
+      "US02Y":        priceResults["2YY=F"],
       "US30Y":        priceResults["^TYX"],
-      "DXY":          priceResults["DX-Y.NYB"],
+      "DXY":          priceResults["DX-Y.NYB", "^FVX"],
       "OANDA:XAUUSD": priceResults["GC=F"],
     };
 
