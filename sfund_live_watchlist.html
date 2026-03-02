@@ -700,7 +700,7 @@
   ];
 
   const cache={}, fredCache={};
-  let activeFilter="all",countdownSec=60,countdownTimer=null;
+  let activeFilter="all",countdownSec=300,countdownTimer=null;
 
   // ── Fetch helpers ─────────────────────────────────────────────────────────
   // ── Single proxy fetch ───────────────────────────────────────────────────
@@ -766,7 +766,7 @@
     updateFOMC();
     evaluateDecision();
     updateAlertBar();
-    setStatus("live","Live — auto-refreshes every 60s");
+    setStatus("live","Live — auto-refreshes every 5 min");
     document.getElementById("last-update").textContent=
       "Updated: "+new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     document.getElementById("refresh-btn").disabled=false;
@@ -852,11 +852,11 @@
 
   function startCountdown(){
     if(countdownTimer)clearInterval(countdownTimer);
-    countdownSec=60;
+    countdownSec=300;
     const el=document.getElementById("countdown");
-    el.textContent=`Next refresh in ${countdownSec}s`;
+    el.textContent=`Next refresh in ${Math.floor(countdownSec/60)}m ${countdownSec%60}s`;
     countdownTimer=setInterval(()=>{
-      countdownSec--;el.textContent=`Next refresh in ${countdownSec}s`;
+      countdownSec--;el.textContent=`Next refresh in ${Math.floor(countdownSec/60)}m ${countdownSec%60}s`;
       if(countdownSec<=0){clearInterval(countdownTimer);el.textContent="";fetchAll();}
     },1000);
   }
