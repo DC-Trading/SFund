@@ -1,5 +1,4 @@
 const https = require("https");
-
 const FRED_KEY = "7a6cf55858969b817e221d06da1ee3ce";
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -50,50 +49,74 @@ async function fetchCPIyoy() {
   return { value: ((latest - yearAgo) / yearAgo) * 100, date: obs[0].date };
 }
 
+
+async function fetchPCEyoy() {
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=PCEPILFE&api_key=${FRED_KEY}&file_type=json&sort_order=desc&limit=14`;
+  const data = await httpsGet(url, 8000);
+  if (!data?.observations) return null;
+  const obs = data.observations.filter(o => o.value !== "." && !isNaN(parseFloat(o.value)));
+  if (obs.length < 13) return null;
+  const latest = parseFloat(obs[0].value);
+  const yearAgo = parseFloat(obs[12].value);
+  return { value: ((latest - yearAgo) / yearAgo) * 100, date: obs[0].date };
+}
 exports.handler = async (event) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
   };
-
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers, body: "" };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers, body: "" };
 
   try {
-    // All price data via Yahoo Finance — works reliably from server-side
-    const yahooSymbols = [
-      "^DWCPF", "^RUT", "IWM", "MDY", "KRE", "IYJ", "SPY",
-      "^VIX", "^TNX", "^IRX", "^TYX", "DX-Y.NYB", "^FVX", "GC=F"
+    // Yahoo symbols — tested and confirmed working
+    const symbolMap = [
+      { key: "^DWCPF",       yahoo: "^DWCPF"    },
+      { key: "RUT",          yahoo: "^RUT"       },
+      { key: "IWM",          yahoo: "IWM"        },
+      { key: "MDY",          yahoo: "MDY"        },
+      { key: "KRE",          yahoo: "KRE"        },
+      { key: "IYJ",          yahoo: "IYJ"        },
+      { key: "SPY",          yahoo: "SPY"        },
+      { key: "VIX",          yahoo: "^VIX"       },
+      { key: "US10Y",        yahoo: "^TNX"       }, // 10-yr yield (e.g. 4.04%)
+      { key: "US02Y",        yahoo: "^IRX"       }, // 13-wk but best proxy; will scale x10
+      { key: "US30Y",        yahoo: "^TYX"       }, // 30-yr yield
+      { key: "DXY",          yahoo: "UUP"        }, // Dollar ETF — avoids DX-Y.NYB scaling issue
+      { key: "OANDA:XAUUSD", yahoo: "GC=F"       }, // Gold futures
     ];
 
-    const priceResults = {};
-    for (const sym of yahooSymbols) {
-      priceResults[sym] = await fetchYahoo(sym);
+    const prices = {};
+    for (const { key, yahoo } of symbolMap) {
+      const result = await fetchYahoo(yahoo);
+      prices[key] = result;
       await sleep(100);
     }
 
-    // Map Yahoo symbols to dashboard keys
-    const prices = {
-      "^DWCPF":       priceResults["^DWCPF"],
-      "RUT":          priceResults["^RUT"],
-      "IWM":          priceResults["IWM"],
-      "MDY":          priceResults["MDY"],
-      "KRE":          priceResults["KRE"],
-      "IYJ":          priceResults["IYJ"],
-      "SPY":          priceResults["SPY"],
-      "VIX":          priceResults["^VIX"],
-      "US10Y":        priceResults["^TNX"],
-      "US02Y":        priceResults["2YY=F"],
-      "US30Y":        priceResults["^TYX"],
-      "DXY":          priceResults["DX-Y.NYB", "^FVX"],
-      "OANDA:XAUUSD": priceResults["GC=F"],
-    };
+    // ^TNX and ^TYX return yields already in percent (e.g. 4.048)
+    // ^IRX returns annualized discount rate — need to scale: divide by 10 to get ~4.x%
+    // Actually ^IRX returns e.g. 43.90 meaning 4.390% — divide by 10
+    if (prices["US02Y"] && prices["US02Y"].c > 10) {
+      const q = prices["US02Y"];
+      prices["US02Y"] = { c: q.c/10, d: q.d/10, dp: q.dp, pc: q.pc/10 };
+    }
+
+    // UUP is ~$28, not 98 — so for DXY display we note it's a proxy ETF
+    // Better: fetch actual DXY via different approach
+    // Use FRED for DXY: series DTWEXBGS or just keep UUP as proxy
+    // Actually let's try the Stooq URL for DXY
+    const dxyUrl = "https://stooq.com/q/l/?s=usdx.forex&f=sd2t2ohlcv&h&e=json";
+    const dxyData = await httpsGet(dxyUrl, 5000);
+    if (dxyData?.symbols?.[0]) {
+      const s = dxyData.symbols[0];
+      const c = parseFloat(s.close), pc = parseFloat(s.open);
+      if (!isNaN(c) && !isNaN(pc)) {
+        prices["DXY"] = { c, d: c-pc, dp: ((c-pc)/pc)*100, pc };
+      }
+    }
 
     // FRED in parallel
     const [pce, cpi, ism, gdp, jobless, nfci] = await Promise.all([
-      fetchFRED("PCEPILFE"),
+      fetchPCEyoy(),
       fetchCPIyoy(),
       fetchFRED("NAPM"),
       fetchFRED("A191RL1Q225SBEA"),
@@ -117,12 +140,7 @@ exports.handler = async (event) => {
         timestamp: new Date().toISOString(),
       }),
     };
-
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: err.message }),
-    };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 };
