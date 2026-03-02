@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TSP Intelligence Terminal</title>
+  <title>TSP Fund Watchlist</title>
   <style>
-    *, *::before, *::after { box-sizing:border-box; margin:0; padding:07:56 PM 3/1/2026; }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     body { min-height:100vh; background:#090c12; color:#c8d6e8; font-family:'Courier New','Lucida Console',monospace; }
 
     /* ── HEADER ── */
@@ -154,7 +154,7 @@
   <div id="header-top">
     <div>
       <div class="terminal-label">TSP INTELLIGENCE TERMINAL · LIVE</div>
-      <div class="terminal-title">S FUND WATCHLIST</div>
+      <div class="terminal-title">TSP FUND WATCHLIST</div>
       <div class="terminal-subtitle" id="datestamp"></div>
     </div>
   </div>
@@ -282,7 +282,7 @@
   function isNearNoon(){
     const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
     const mins=et.getHours()*60+et.getMinutes();
-    return mins>=675&&mins<720; // 11:15am–12:00pm
+    return mins>=660&&mins<675; // 11:00am–11:15am
   }
   function isEOD(){
     const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
@@ -408,9 +408,9 @@
     // 11:15 trigger
     const nearNoon=isNearNoon(), mktOpen=getMarketStatus()==="open";
     if(nearNoon&&mktOpen){
-      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM — DECISION WINDOW OPEN — ${45-(new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})).getMinutes()-15)} MIN TO NOON</span>${gsAllMet?"<strong>✅ ALL PRIMARIES GREEN — CONSIDER G→S NOW</strong>":gsMetCount>=3?"<strong>⚠️ CLOSE — Missing "+gsPrimaries.filter(p=>!p.ok).map(p=>p.label).join(", ")+"</strong>":"<strong>❌ Conditions not met — hold G position</strong>"}`;
+      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM — DECISION WINDOW OPEN — ACT BY NOON</span>${gsAllMet?"<strong>✅ ALL PRIMARIES GREEN — CONSIDER G→S NOW</strong>":gsMetCount>=3?"<strong>⚠️ CLOSE — Missing "+gsPrimaries.filter(p=>!p.ok).map(p=>p.label).join(", ")+"</strong>":"<strong>❌ Conditions not met — hold G position</strong>"}`;
     } else {
-      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>This fires Mon–Fri between 11:15am–12:00pm ET when you need to act. ${mktOpen?"Active now — "+gsMetCount+" of 4 primaries confirmed.":"Market closed."}`;
+      gs1115El.innerHTML=`<span class="trigger-label">⏰ 11:00–11:15AM DECISION TRIGGER</span>This fires Mon–Fri between 11:00–11:15am ET — giving you 45 min to act before noon. ${mktOpen?"Active now — "+gsMetCount+" of 4 primaries confirmed.":"Market closed."}`;
     }
 
     // EOD trigger
@@ -474,7 +474,7 @@
     if(nearNoon&&mktOpen){
       sg1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM — DECISION WINDOW OPEN</span>${anyOverride?"<strong>🚨 OVERRIDE — EXIT S FUND NOW</strong>":sgMetCount>=2?"<strong>⚠️ EXIT CONDITIONS MET — Consider S→G before noon</strong>":"<strong>✅ Hold S Fund — conditions supportive</strong>"}`;
     } else {
-      sg1115El.innerHTML=`<span class="trigger-label">⏰ 11:15AM DECISION TRIGGER</span>Fires Mon–Fri 11:15am–noon ET. ${mktOpen?"Active now — "+sgMetCount+" of 4 exit triggers active.":"Market closed."}`;
+      sg1115El.innerHTML=`<span class="trigger-label">⏰ 11:00–11:15AM DECISION TRIGGER</span>Fires Mon–Fri 11:00–11:15am ET — 45 min before noon deadline. ${mktOpen?"Active now — "+sgMetCount+" of 4 exit triggers active.":"Market closed."}`;
     }
 
     // S→G EOD
