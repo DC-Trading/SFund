@@ -645,7 +645,7 @@
       id:"fed",category:"🏦 Fed & Policy",subtitle:"Forward-looking rate signals",color:"#44aaff",
       items:[
         {
-          symbol:"US02Y",source:"finnhub",cacheKey:"US02Y",name:"2-Yr Treasury (Fed expectations)",badge:"PRIMARY SIGNAL",
+          symbol:"US02Y-FED",source:"finnhub",cacheKey:"US02Y",name:"2-Yr Treasury (Fed expectations)",badge:"PRIMARY SIGNAL",
           threshold:"Falling = rate cuts priced in (bullish) · Rising = hawkish repricing",
           signalFn:priceDown,
           mechanism:"The most real-time indicator of what the market thinks the Fed will do. Falls when rate cuts are expected, rises when hikes or holds are expected. Small caps are the most rate-sensitive asset class — a falling 2-Year is like fuel for the S Fund.",
@@ -653,7 +653,7 @@
           sg_note:"S→G: 2-Year reversing higher = the rate cut narrative is breaking down. When markets reprice Fed hawkishness, small caps sell off faster than large caps."
         },
         {
-          symbol:"US10Y",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"PRIMARY SIGNAL",
+          symbol:"US10Y-FED",source:"finnhub",cacheKey:"US10Y",name:"10-Year Treasury Yield",badge:"PRIMARY SIGNAL",
           threshold:"Falling = growth optimism · Rising fast = tightening headwind",
           signalFn:priceDown,
           mechanism:"The long-end rate. Reflects expectations for long-term growth and inflation. When the 10-Year rises due to inflation fears (not growth), it's bad for stocks — especially small caps with high debt loads.",
@@ -661,7 +661,7 @@
           sg_note:"S→G: 10-Year rising sharply while stocks fall = stagflation signal. The worst environment for the S Fund — high rates AND slowing growth."
         },
         {
-          symbol:"US30Y",source:"finnhub",cacheKey:"US30Y",name:"30-Year Treasury Yield",badge:"",
+          symbol:"US30Y-FED",source:"finnhub",cacheKey:"US30Y",name:"30-Year Treasury Yield",badge:"",
           threshold:"Rising 30Y = long-term inflation concerns — watch alongside 10Y",
           signalFn:priceDown,
           mechanism:"The longest maturity Treasury. Reflects very long-term inflation expectations. When the 30-Year rises while the 10-Year also rises, it means the bond market is worried about structural inflation — a multi-year headwind for the S Fund.",
@@ -814,10 +814,10 @@
     }
     if(item.source==="spread"||item.source==="fomc")return;
     const q=cache[item.cacheKey];
-    if(!q){priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Mkt closed / N/A</span>`;signalEl.innerHTML=`<span class="signal-badge sig-loading">— N/A</span>`;return;}
-    const chgClass=q.dp>=0?"up-price":"dn-price",arrow=q.dp>=0?"▲":"▼";
-    const priceTxt=fmtPrice(q.c,item.cacheKey)||q.c.toFixed(2),chgTxt=fmtChg(q.d,q.c,item.cacheKey);
-    priceEl.innerHTML=`<div class="price-val">${priceTxt}</div><div class="price-chg ${chgClass}">${arrow} ${chgTxt} (${fmtSign(q.dp)}%)</div>`;
+    if(!q||q.c===null||q.c===undefined||isNaN(q.c)){priceEl.innerHTML=`<span style="color:#3a5a7a;font-size:10px;">Mkt closed / N/A</span>`;signalEl.innerHTML=`<span class="signal-badge sig-loading">— N/A</span>`;return;}
+    const chgClass=(q.dp||0)>=0?"up-price":"dn-price",arrow=(q.dp||0)>=0?"▲":"▼";
+    const priceTxt=fmtPrice(q.c,item.cacheKey)||q.c.toFixed(2),chgTxt=fmtChg(q.d||0,q.c,item.cacheKey);
+    priceEl.innerHTML=`<div class="price-val">${priceTxt}</div><div class="price-chg ${chgClass}">${arrow} ${chgTxt} (${fmtSign(q.dp||0)}%)</div>`;
     signalEl.innerHTML=`<span class="signal-badge ${item.signalFn(q).cls}">${item.signalFn(q).label}</span>`;
   }
 
