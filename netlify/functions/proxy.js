@@ -24,9 +24,24 @@ async function fetchYahoo(symbol) {
   const meta = result?.meta;
   if (!meta) return null;
   const c = meta.regularMarketPrice || meta.previousClose;
-  // Use regularMarketPreviousClose for accurate day change
-  const pc = meta.regularMarketPreviousClose || meta.chartPreviousClose || meta.previousClose;
-  if (!c || !pc) return null;
+  if (!c) return null;
+
+  // Try to get previous close from actual OHLC data (most reliable)
+  // The closes array has daily closes — second-to-last is prior day
+  const closes = result?.indicators?.quote?.[0]?.close;
+  const timestamps = result?.timestamp;
+  let pc = null;
+  if (closes && closes.length >= 2) {
+    // Find the last two valid (non-null) closes
+    const valid = closes.filter(v => v !== null && !isNaN(v));
+    if (valid.length >= 2) {
+      pc = valid[valid.length - 2]; // prior day close
+    }
+  }
+  // Fallback to meta fields
+  if (!pc) pc = meta.regularMarketPreviousClose || meta.chartPreviousClose || meta.previousClose;
+  if (!pc) return null;
+
   const d = c - pc, dp = pc ? (d / pc) * 100 : 0;
   return { c, d, dp, pc };
 }
