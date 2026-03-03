@@ -20,10 +20,12 @@ function httpsGet(url, timeout = 6000) {
 async function fetchYahoo(symbol) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
   const data = await httpsGet(url);
-  const meta = data?.chart?.result?.[0]?.meta;
+  const result = data?.chart?.result?.[0];
+  const meta = result?.meta;
   if (!meta) return null;
   const c = meta.regularMarketPrice || meta.previousClose;
-  const pc = meta.chartPreviousClose || meta.previousClose;
+  // Use regularMarketPreviousClose for accurate day change
+  const pc = meta.regularMarketPreviousClose || meta.chartPreviousClose || meta.previousClose;
   if (!c || !pc) return null;
   const d = c - pc, dp = pc ? (d / pc) * 100 : 0;
   return { c, d, dp, pc };
